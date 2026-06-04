@@ -1,0 +1,84 @@
+:root {
+    --primary: #1e3a8a;
+    --primary-hover: #1d4ed8;
+    --secondary: #0f172a;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --border: #cbd5e1;
+    --text: #334155;
+    --success: #16a34a;
+    --danger: #dc2626;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--bg-main); color: var(--text); padding-bottom: 60px; font-size: 14px; }
+
+#login-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.95); z-index:99999; display:flex; align-items:center; justify-content:center; }
+.login-card { background: white; width:100%; max-width:400px; padding:35px; border-radius:12px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); }
+#login-err { color:var(--danger); font-size:12px; margin-top:12px; font-weight:600; text-align:center; display:none; }
+
+.navbar { background: var(--secondary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+.navbar h1 { font-size: 18px; font-weight: 600; }
+.stepper { display: flex; background: #fff; border-bottom: 1px solid var(--border); }
+.step { flex: 1; padding: 15px 10px; text-align: center; font-weight: 600; color: #94a3b8; border-bottom: 3px solid transparent; cursor: pointer; }
+.step.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0fdf4; }
+
+.container { max-width: 1400px; margin: 20px auto; padding: 0 15px; }
+.panel { display: none; }
+.panel.active { display: block; }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+h3 { color: var(--secondary); margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+
+.badge { font-size:10px; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px; text-transform:uppercase; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+input, select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; width: 100%; outline: none; }
+
+.subject-box { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
+.subject-hdr { background: #f1f5f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+.chapter-box { background: #fafafa; margin: 10px; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0; border-left: 4px solid var(--primary); }
+.chapter-hdr { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.theme-row { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; padding-left: 20px; }
+
+.btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.btn-p { background: var(--primary); color: white; border: none; }
+.btn-s { background: white; color: var(--secondary); }
+.btn-danger { background: #fee2e2; color: var(--danger); border-color: #fca5a5; }
+.sm-btn { padding: 4px 8px; font-size: 11px; border-radius: 4px; }
+
+.chk-container { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; }
+.chk-container input { width: auto; }
+
+.sheet-wrapper { overflow-x: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 6px; }
+table.sheet { border-collapse: collapse; width: 100%; font-size: 12px; background: white; }
+table.sheet th, table.sheet td { padding: 6px 10px; border: 1px solid var(--border); }
+table.sheet th { background: #1e293b; color: white; text-align: center; position: sticky; top: 0; z-index: 10; }
+table.sheet input.mark-input { width: 45px; text-align: center; font-weight: bold; padding: 4px; }
+table.sheet input.mark-input.err { border-color: var(--danger); background: #fee2e2; }
+.ch-avg-col { background: #f1f5f9 !important; font-weight: bold; text-align: center; color: var(--primary); }
+
+#print-area { background: #525659; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.report-card { background: white; width: 210mm; min-height: 297mm; padding: 25mm 20mm; box-shadow: 0 0 15px rgba(0,0,0,0.3); color: black; }
+.school-header { text-align: center; margin-bottom: 20px; }
+.school-header .sch-name { font-size: 20px; font-weight: bold; text-transform: uppercase; }
+.school-header .sch-title { font-size: 15px; font-weight: bold; text-decoration: underline; margin-top: 15px; }
+.student-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; font-size: 12px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+.cas-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 15px; }
+.cas-table th, .cas-table td { border: 1px solid #000; padding: 4px 8px; }
+.sub-heading-row { background: #f5f5f5; font-weight: bold; }
+.ch-summary-row { background: #fafafa; font-weight: bold; }
+.th-indent { padding-left: 20px !important; }
+.summary-gpa-box { margin-top: 15px; width: 100%; border-collapse: collapse; }
+.summary-gpa-box th, .summary-gpa-box td { border: 1px solid #000; padding: 5px 8px; font-size: 11px; }
+.scale-table { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 15px; }
+.scale-table th, .scale-table td { border: 1px solid #888; padding: 2px 5px; text-align: center; }
+.signature-section { display: flex; justify-content: space-between; margin-top: 50px; font-size: 11px; }
+.sig-line { border-top: 1px solid #000; width: 140px; text-align: center; padding-top: 5px; }
+
+@media print {
+    body { background: none; padding: 0; }
+    .navbar, .stepper, .container, .print-toolbar { display: none !important; }
+    #print-area { background: none; padding: 0; display: block; }
+    .report-card { box-shadow: none; margin: 0; width: 100%; page-break-after: always; padding: 15mm 10mm; }
+}
