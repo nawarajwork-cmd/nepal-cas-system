@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal CAS - Enterprise Grid Architecture</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="login-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:35px; border-radius:12px; width:100%; max-width:400px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.55);">
+        <h2 style="color:#0f172a; margin-bottom:5px; font-size:22px; text-align:center;">Nepal CAS Architecture</h2>
+        <p style="color:#64748b; font-size:12px; text-align:center; margin-bottom:20px;">Centralized Academic Cloud Integration Base Node</p>
+        
+        <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">USER IDENTITY</label>
+            <input type="text" id="user-input" placeholder="admin" style="padding:10px; border:1px solid #cbd5e1; border-radius:6px; width:100%;">
+        </div>
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">ENCRYPTION KEYWAY PASSWORD</label>
+            <input type="password" id="pass-input" placeholder="••••••••" style="padding:10px; border:1px solid #cbd5e1; border-radius:6px; width:100%;">
+        </div>
+        
+        <button onclick="runAuthPipeline()" style="width:100%; padding:12px; background:#1e3a8a; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Verify Security Token</button>
+        <p id="auth-error" style="color:#dc2626; font-size:12px; text-align:center; margin-top:12px; display:none; font-weight:600;"></p>
+    </div>
+</div>
+
+<div class="navbar" style="background:#0f172a; color:#fff; padding:15px 20px; display:flex; justify-content:between; align-items:center;">
+    <h2 style="font-size:16px;">SIRJANA CAS RECORD SHEETS INFRASTRUCTURE ENGINE</h2>
+    <button onclick="terminateSession()" style="padding:4px 10px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:4px; cursor:pointer; font-weight:600; font-size:11px;">Logout Node</button>
+</div>
+
+<div class="stepper" style="display:flex; background:#fff; border-bottom:1px solid #cbd5e1; text-align:center;">
+    <div class="step active" id="st-1" onclick="shiftPanel(1)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">1. System & Subject Configuration</div>
+    <div class="step" id="st-2" onclick="shiftPanel(2)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">2. Interactive Mark Entry Matrix</div>
+    <div class="step" id="st-3" onclick="shiftPanel(3)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">3. Structural Printing Engine</div>
+</div>
+
+<div class="container" style="max-width:1400px; margin:25px auto; padding:0 20px;">
+    
+    <div class="panel active" id="view-setup">
+        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px; margin-bottom:20px;">
+            <h3 style="margin-bottom:15px; color:#1e3a8a;">Academic Record Mapping Properties</h3>
+            <div class="grid-3" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:15px;">
+                <div><label style="font-size:11px; font-weight:600; color:#64748b;">SCHOOL REGISTER NAME</label><input id="p-name" oninput="pushProfileStream()"/></div>
+                <div><label style="font-size:11px; font-weight:600; color:#64748b;">LOCATION ADDRESS DESCRIPTION</label><input id="p-addr" oninput="pushProfileStream()"/></div>
+                <div><label style="font-size:11px; font-weight:600; color:#64748b;">EMIS TRACKING CODE</label><input id="p-emis" oninput="pushProfileStream()"/></div>
+                <div>
+                    <label style="font-size:11px; font-weight:600; color:#64748b;">TARGET CLASS TRACK</label>
+                    <select id="p-grade" onchange="switchDataGradeContext()">
+                        <option value="1">Grade I</option>
+                        <option value="2">Grade II</option>
+                        <option value="3">Grade III</option>
+                    </select>
+                </div>
+                <div><label style="font-size:11px; font-weight:600; color:#64748b;">ACADEMIC CALENDAR YEAR</label><input id="p-year" oninput="pushProfileStream()"/></div>
+                <div><label style="font-size:11px; font-weight:600; color:#64748b;">EVALUATION TERM FOCUS</label><input id="p-term" oninput="pushProfileStream()"/></div>
+            </div>
+        </div>
+
+        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px;">
+            <h3 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <span>Curriculum Mapping Matrix</span>
+                <button onclick="createNewSubjectNode()" style="padding:6px 12px; background:#1e3a8a; color:#fff; border:none; border-radius:4px; cursor:pointer;">+ Append New Dynamic Subject</button>
+            </h3>
+            <div id="curriculum-rendering-node"></div>
+        </div>
+    </div>
+
+    <div class="panel" id="view-marks">
+        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px;">
+            <h3 style="margin-bottom:15px;">Student Roster Execution Matrix</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button onclick="createNewStudentNode()" style="padding:8px 14px; background:#16a34a; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">+ Register Single Student</button>
+                <button onclick="executeBulkImport()" style="padding:8px 14px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">⚡ Bulk Import Line Names</button>
+            </div>
+            <div style="overflow-x:auto; max-height:65vh;">
+                <table id="data-sheet-matrix" style="width:100%; border-collapse:collapse; font-size:12px;"></table>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" id="view-print">
+        <div style="background:#475569; padding:15px; display:flex; gap:15px; align-items:center; border-radius:6px; margin-bottom:20px; color:#fff;">
+            <button onclick="window.print()" style="padding:10px 20px; background:#16a34a; border:none; color:#fff; font-weight:bold; border-radius:4px; cursor:pointer;">🖨 Dispatch Bulk System Print Job</button>
+            <span id="print-counter-flag" style="font-weight:600;"></span>
+        </div>
+        <div id="print-assembly-node" style="display:flex; flex-direction:column; gap:30px; align-items:center; background:#1e293b; padding:20px 0;"></div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
