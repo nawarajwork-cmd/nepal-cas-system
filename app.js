@@ -516,7 +516,6 @@ function shiftPanel(stepNum) {
     }
 }
 
-window.onload = function() { bootstrapApplicationNode(); };
 /**
  * Fetches and renders the Admin dashboard state.
  * Call this function whenever the Admin tab is opened or an action is completed.
@@ -554,3 +553,20 @@ async function loadAdminDashboard() {
         alert("Could not load dashboard data.");
     }
 }
+async function loadAnalytics() {
+    const response = await fetch(`${API_BASE}/api/admin/analytics`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const stats = await response.json();
+
+    // Dynamically build a performance summary table
+    const container = document.getElementById('analytics-container');
+    container.innerHTML = stats.map(s => `
+        <div class="stat-card">
+            <h4>${s.subject_name}</h4>
+            <p>Marks Recorded: ${s.total_marks_recorded}</p>
+            <p>Class Average: ${parseFloat(s.average_score).toFixed(2)}</p>
+        </div>
+    `).join('');
+}
+window.onload = function() { bootstrapApplicationNode(); };
