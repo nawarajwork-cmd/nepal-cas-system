@@ -117,21 +117,29 @@ async function fetchCloudSystemState() {
     } catch (err) { console.error("Global system infrastructure synchronize interruption:", err); }
 }
 // Example of your login handler
-async function handleLogin() {
-    // ... after your fetch call returns successfully:
-    const data = await response.json();
-    
-    // Store token
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('role', data.role); // Store the role as well
+async function handleLogin(username, password) {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
 
-    // Logic for visibility
-    if (data.role === 'admin') {
-        document.getElementById('admin-panel').style.display = 'block';
-        loadAdminDashboard(); // Automatically load data if they are admin
+    const data = await res.json();
+    if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+
+        // THE VISIBILITY TOGGLE
+        if (data.role === 'admin') {
+            document.getElementById('admin-panel').style.display = 'block';
+            console.log("Admin panel displayed.");
+            loadAdminDashboard(); 
+        } else {
+            document.getElementById('admin-panel').style.display = 'none';
+            alert("Logged in as Teacher");
+        }
     } else {
-        document.getElementById('admin-panel').style.display = 'none';
-        // Hide admin panel and show teacher/student dashboard instead
+        alert("Login failed: " + data.error);
     }
 }
 // --- DATA SCHEMA PARSING RECURSIONS ---
