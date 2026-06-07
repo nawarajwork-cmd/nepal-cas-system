@@ -663,8 +663,15 @@ BACKEND_CURRICULUM_CACHE
         .chapters
         .push(chapter);
     }
+    
+if(row.theme_id) {
 
-    if(row.theme_id) {
+    const alreadyExists =
+        chapter.themes.find(
+            th => th.id === row.theme_id
+        );
+
+    if(!alreadyExists) {
 
         chapter.themes.push({
 
@@ -673,6 +680,7 @@ BACKEND_CURRICULUM_CACHE
             name: row.theme_name
         });
     }
+}
 });
 
 return map;
@@ -977,71 +985,81 @@ alert(
 
 function fetchChapters() {
 
-  fetch(
-    `${API_BASE}/teacher/chapters`,
+    fetch(
+        `${API_BASE}/teacher/chapters`,
     {
+        headers:{
+            Authorization:
+            `Bearer ${SESSION_TOKEN}`
+        }
+    })
 
-      headers: {
-        Authorization:
-          `Bearer ${SESSION_TOKEN}`
-      }
+    .then(async res => {
 
-    }
-  )
+        const data =
+            await res.json();
 
-  .then(res => res.json())
+        if(!res.ok) {
 
-  .then(data => {
+            console.log(data);
 
-    console.log(data);
+            throw new Error(
+                data.error || 'Server Error'
+            );
+        }
 
-    // IMPORTANT SAFETY
-    if(!Array.isArray(data)) {
+        return data;
+    })
 
-      console.log("Backend Error:", data);
+    .then(data => {
 
-      return;
-    }
+        let html = "";
 
-    let html = "";
+        data.forEach(ch => {
 
-    data.forEach(ch => {
+            html += `
 
-      html += `
+            <div
+                style="
+                    padding:8px;
+                    border-bottom:
+                    1px solid #ddd;
+                "
+            >
 
-        <div
-          style="
-            padding:8px;
-            border-bottom:1px solid #ddd;
-          "
-        >
+                <input
+                    type="checkbox"
 
-          <input
-            type="checkbox"
+                    ${ch.is_selected
+                    ? "checked"
+                    : ""}
 
-            ${ch.is_selected ? "checked" : ""}
+                    onchange="
+                        toggleChapter(
+                            ${ch.chapter_id},
+                            this.checked
+                        )
+                    "
+                />
 
-            onchange="
-              toggleChapter(
-                ${ch.chapter_id},
-                this.checked
-              )
-            "
-          />
+                ${ch.subject_code}
+                -
+                ${ch.chapter_name}
 
-          ${ch.subject_code}
-          -
-          ${ch.chapter_name}
+            </div>
+            `;
+        });
 
-        </div>
-      `;
+        document.getElementById(
+            "chapterList"
+        ).innerHTML = html;
+    })
+
+    .catch(err => {
+
+        console.log(err);
+
     });
-
-    document.getElementById(
-      "chapterList"
-    ).innerHTML = html;
-
-  });
 }
 function toggleChapter(chapterId, isSelected) {
 
