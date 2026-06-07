@@ -974,15 +974,20 @@ alert(
     'Use your previous bulk import logic here'
 );
 }
+
 function fetchChapters() {
 
-  fetch('https://cas-backend-s9ba.onrender.com/api/teacher/chapters', {
+  fetch(
+    'https://cas-backend-s9ba.onrender.com/api/teacher/chapters',
+    {
 
-    headers: {
-      Authorization: `Bearer ${token}`
+      headers: {
+        Authorization:
+          `Bearer ${SESSION_TOKEN}`
+      }
+
     }
-
-  })
+  )
 
   .then(res => res.json())
 
@@ -993,52 +998,72 @@ function fetchChapters() {
     data.forEach(ch => {
 
       html += `
-        <div>
+        <div
+          style="
+            padding:8px;
+            border-bottom:1px solid #ddd;
+          "
+        >
 
-          <input 
+          <input
             type="checkbox"
 
             ${ch.is_selected ? "checked" : ""}
 
-            onchange="toggleChapter(${ch.chapter_id}, this.checked)"
+            onchange="
+              toggleChapter(
+                ${ch.chapter_id},
+                this.checked
+              )
+            "
           />
 
-          ${ch.subject_code} - ${ch.chapter_name}
+          ${ch.subject_code}
+          -
+          ${ch.chapter_name}
 
         </div>
       `;
     });
 
-    document.getElementById("chapterList").innerHTML = html;
+    document.getElementById(
+      "chapterList"
+    ).innerHTML = html;
 
   });
 }
 
 function toggleChapter(chapterId, isSelected) {
 
-  fetch('https://cas-backend-s9ba.onrender.com/api/teacher/chapter-toggle', {
+  fetch(
+    'https://cas-backend-s9ba.onrender.com/api/teacher/chapter-toggle',
+    {
 
-    method: 'POST',
+      method: 'POST',
 
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
+      headers: {
 
-    body: JSON.stringify({
+        'Content-Type':
+          'application/json',
 
-      chapter_id: chapterId,
-      is_selected: isSelected
+        Authorization:
+          `Bearer ${SESSION_TOKEN}`
+      },
 
-    })
+      body: JSON.stringify({
 
-  });
+        chapter_id: chapterId,
+        is_selected: isSelected
+
+      })
+
+    }
+  );
 }
-renderCurriculum()
 // ====================================================== // LOAD APP // ======================================================
-window.onload = () => {
-  fetchChapters();
-};
-window.onload = function() {
-bootstrapApplicationNode();
+window.onload = async function() {
+
+    await bootstrapApplicationNode();
+
+    await fetchChapters();
 };
