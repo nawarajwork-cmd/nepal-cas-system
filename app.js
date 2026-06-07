@@ -978,7 +978,7 @@ alert(
 function fetchChapters() {
 
   fetch(
-    'https://cas-backend-s9ba.onrender.com/api/teacher/chapters',
+    `${API_BASE}/teacher/chapters`,
     {
 
       headers: {
@@ -993,11 +993,22 @@ function fetchChapters() {
 
   .then(data => {
 
+    console.log(data);
+
+    // IMPORTANT SAFETY
+    if(!Array.isArray(data)) {
+
+      console.log("Backend Error:", data);
+
+      return;
+    }
+
     let html = "";
 
     data.forEach(ch => {
 
       html += `
+
         <div
           style="
             padding:8px;
@@ -1032,7 +1043,6 @@ function fetchChapters() {
 
   });
 }
-
 function toggleChapter(chapterId, isSelected) {
 
   fetch(
