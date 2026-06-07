@@ -1,145 +1,858 @@
+```html id="s9r2dk"
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal CAS - Enterprise Grid Architecture</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Sirjana CAS Remote System
+    </title>
+
     <link rel="stylesheet" href="styles.css">
-    <style>
-    /* Ensure the panel can be toggled by JS */
-    #admin-panel {
-        display: none; 
-    }
-</style>
+
 </head>
-<body>
-<div id="login-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center;">
-    <div style="background:#fff; padding:35px; border-radius:12px; width:100%; max-width:400px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.55);">
-        <h2 style="color:#0f172a; margin-bottom:5px; font-size:22px; text-align:center;">Nepal CAS Architecture</h2>
-        <p style="color:#64748b; font-size:12px; text-align:center; margin-bottom:20px;">Centralized Academic Cloud Integration Base Node</p>
-        
-        <div style="margin-bottom:12px;">
-            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">USER IDENTITY</label>
-            <input type="text" id="user-input" placeholder="admin" style="padding:10px; border:1px solid #cbd5e1; border-radius:6px; width:100%;">
+
+<body style="background:#f1f5f9; margin:0; font-family:Arial, sans-serif;">
+
+<!-- ====================================================== -->
+<!-- LOGIN MODAL -->
+<!-- ====================================================== -->
+
+<div
+    id="login-modal"
+    style="
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(15,23,42,0.97);
+        z-index:99999;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    "
+>
+
+    <div
+        style="
+            background:#fff;
+            width:100%;
+            max-width:420px;
+            border-radius:12px;
+            padding:35px;
+            box-shadow:0 20px 40px rgba(0,0,0,0.35);
+        "
+    >
+
+        <h2
+            style="
+                text-align:center;
+                color:#0f172a;
+                margin-bottom:5px;
+            "
+        >
+            SIRJANA CAS SYSTEM
+        </h2>
+
+        <p
+            style="
+                text-align:center;
+                color:#64748b;
+                font-size:13px;
+                margin-bottom:25px;
+            "
+        >
+            Remote Academic Management Platform
+        </p>
+
+        <!-- ROLE -->
+
+        <div style="margin-bottom:15px;">
+
+            <label
+                style="
+                    font-size:11px;
+                    font-weight:bold;
+                    display:block;
+                    margin-bottom:5px;
+                    color:#475569;
+                "
+            >
+                LOGIN TYPE
+            </label>
+
+            <select
+                id="login-role"
+                style="
+                    width:100%;
+                    padding:10px;
+                    border:1px solid #cbd5e1;
+                    border-radius:6px;
+                "
+            >
+
+                <option value="ADMIN">
+                    ADMIN
+                </option>
+
+                <option value="TEACHER">
+                    TEACHER
+                </option>
+
+            </select>
+
         </div>
+
+        <!-- USERNAME -->
+
+        <div style="margin-bottom:15px;">
+
+            <label
+                style="
+                    font-size:11px;
+                    font-weight:bold;
+                    display:block;
+                    margin-bottom:5px;
+                    color:#475569;
+                "
+            >
+                USERNAME
+            </label>
+
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Enter Username"
+                style="
+                    width:100%;
+                    padding:10px;
+                    border:1px solid #cbd5e1;
+                    border-radius:6px;
+                "
+            >
+
+        </div>
+
+        <!-- PASSWORD -->
+
         <div style="margin-bottom:20px;">
-            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">ENCRYPTION KEYWAY PASSWORD</label>
-            <input type="password" id="pass-input" placeholder="••••••••" style="padding:10px; border:1px solid #cbd5e1; border-radius:6px; width:100%;">
+
+            <label
+                style="
+                    font-size:11px;
+                    font-weight:bold;
+                    display:block;
+                    margin-bottom:5px;
+                    color:#475569;
+                "
+            >
+                PASSWORD
+            </label>
+
+            <input
+                type="password"
+                id="pass-input"
+                placeholder="Enter Password"
+                style="
+                    width:100%;
+                    padding:10px;
+                    border:1px solid #cbd5e1;
+                    border-radius:6px;
+                "
+            >
+
         </div>
-        
-        <button onclick="runAuthPipeline()" style="width:100%; padding:12px; background:#1e3a8a; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Verify Security Token</button>
-        <p id="auth-error" style="color:#dc2626; font-size:12px; text-align:center; margin-top:12px; display:none; font-weight:600;"></p>
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+            onclick="runAuthPipeline()"
+            style="
+                width:100%;
+                padding:12px;
+                background:#1e3a8a;
+                color:#fff;
+                border:none;
+                border-radius:6px;
+                font-weight:bold;
+                cursor:pointer;
+            "
+        >
+            Login
+        </button>
+
+        <!-- ERROR -->
+
+        <p
+            id="auth-error"
+            style="
+                color:#dc2626;
+                text-align:center;
+                font-size:12px;
+                margin-top:15px;
+                display:none;
+                font-weight:bold;
+            "
+        ></p>
+
     </div>
+
 </div>
 
-<div class="navbar" style="background:#0f172a; color:#fff; padding:15px 20px; display:flex; justify-content:between; align-items:center;">
-    <h2 style="font-size:16px;">SIRJANA CAS RECORD SHEETS INFRASTRUCTURE ENGINE</h2>
-    <button onclick="terminateSession()" style="padding:4px 10px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:4px; cursor:pointer; font-weight:600; font-size:11px;">Logout Node</button>
+<!-- ====================================================== -->
+<!-- NAVBAR -->
+<!-- ====================================================== -->
+
+<div
+    style="
+        background:#0f172a;
+        color:#fff;
+        padding:15px 20px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    "
+>
+
+    <h2 style="margin:0; font-size:18px;">
+        SIRJANA CAS MANAGEMENT SYSTEM
+    </h2>
+
+    <button
+        onclick="terminateSession()"
+        style="
+            background:#fee2e2;
+            color:#dc2626;
+            border:none;
+            padding:8px 12px;
+            border-radius:5px;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+        Logout
+    </button>
+
 </div>
 
-<div class="stepper" style="display:flex; background:#fff; border-bottom:1px solid #cbd5e1; text-align:center;">
-    <div class="step active" id="st-1" onclick="shiftPanel(1)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">1. System & Subject Configuration</div>
-    <div class="step" id="st-2" onclick="shiftPanel(2)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">2. Interactive Mark Entry Matrix</div>
-    <div class="step" id="st-3" onclick="shiftPanel(3)" style="flex:1; padding:15px; cursor:pointer; font-weight:600;">3. Structural Printing Engine</div>
+<!-- ====================================================== -->
+<!-- STEPPER -->
+<!-- ====================================================== -->
+
+<div
+    style="
+        display:flex;
+        background:#fff;
+        border-bottom:1px solid #cbd5e1;
+    "
+>
+
+    <div
+        class="step active"
+        id="st-1"
+        onclick="shiftPanel(1)"
+        style="
+            flex:1;
+            padding:15px;
+            text-align:center;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+        Setup
+    </div>
+
+    <div
+        class="step"
+        id="st-2"
+        onclick="shiftPanel(2)"
+        style="
+            flex:1;
+            padding:15px;
+            text-align:center;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+        Marks
+    </div>
+
+    <div
+        class="step"
+        id="st-3"
+        onclick="shiftPanel(3)"
+        style="
+            flex:1;
+            padding:15px;
+            text-align:center;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+        Reports
+    </div>
+
 </div>
 
-<div class="container" style="max-width:1400px; margin:25px auto; padding:0 20px;">
-    
-    <div class="panel active" id="view-setup">
-        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin-bottom:15px; color:#1e3a8a;">Academic Record Mapping Properties</h3>
-            <div class="grid-3" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:15px;">
-                <div><label style="font-size:11px; font-weight:600; color:#64748b;">SCHOOL REGISTER NAME</label><input id="p-name" oninput="pushProfileStream()"/></div>
-                <div><label style="font-size:11px; font-weight:600; color:#64748b;">LOCATION ADDRESS DESCRIPTION</label><input id="p-addr" oninput="pushProfileStream()"/></div>
-                <div><label style="font-size:11px; font-weight:600; color:#64748b;">EMIS TRACKING CODE</label><input id="p-emis" oninput="pushProfileStream()"/></div>
-                <div>
-                    <label style="font-size:11px; font-weight:600; color:#64748b;">TARGET CLASS TRACK</label>
-                    <select id="p-grade" onchange="switchDataGradeContext()">
-                        <option value="1">Grade I</option>
-                        <option value="2">Grade II</option>
-                        <option value="3">Grade III</option>
-                    </select>
-                </div>
-                <div><label style="font-size:11px; font-weight:600; color:#64748b;">ACADEMIC CALENDAR YEAR</label><input id="p-year" oninput="pushProfileStream()"/></div>
-                <div><label style="font-size:11px; font-weight:600; color:#64748b;">EVALUATION TERM FOCUS</label><input id="p-term" oninput="pushProfileStream()"/></div>
-            </div>
-        </div>
+<!-- ====================================================== -->
+<!-- MAIN CONTAINER -->
+<!-- ====================================================== -->
 
-        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px;">
-            <h3 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <span>Curriculum Mapping Matrix</span>
-                <button onclick="createNewSubjectNode()" style="padding:6px 12px; background:#1e3a8a; color:#fff; border:none; border-radius:4px; cursor:pointer;">+ Append New Dynamic Subject</button>
+<div
+    style="
+        max-width:1400px;
+        margin:25px auto;
+        padding:0 20px;
+    "
+>
+
+    <!-- ================================================== -->
+    <!-- SETUP PANEL -->
+    <!-- ================================================== -->
+
+    <div
+        class="panel active"
+        id="view-setup"
+    >
+
+        <!-- ============================================== -->
+        <!-- SCHOOL PROFILE -->
+        <!-- ============================================== -->
+
+        <div
+            style="
+                background:#fff;
+                border-radius:8px;
+                padding:20px;
+                margin-bottom:20px;
+                border:1px solid #cbd5e1;
+            "
+        >
+
+            <h3
+                style="
+                    margin-top:0;
+                    margin-bottom:20px;
+                    color:#1e3a8a;
+                "
+            >
+                School Profile
             </h3>
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:
+                    repeat(auto-fit,minmax(250px,1fr));
+                    gap:15px;
+                "
+            >
+
+                <div>
+
+                    <label>
+                        School Name
+                    </label>
+
+                    <input
+                        id="p-name"
+                        oninput="pushProfileStream()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                </div>
+
+                <div>
+
+                    <label>
+                        Address
+                    </label>
+
+                    <input
+                        id="p-addr"
+                        oninput="pushProfileStream()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                </div>
+
+                <div>
+
+                    <label>
+                        EMIS
+                    </label>
+
+                    <input
+                        id="p-emis"
+                        oninput="pushProfileStream()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                </div>
+
+                <div>
+
+                    <label>
+                        Grade
+                    </label>
+
+                    <select
+                        id="p-grade"
+                        onchange="switchDataGradeContext()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                        <option value="1">
+                            Grade 1
+                        </option>
+
+                        <option value="2">
+                            Grade 2
+                        </option>
+
+                        <option value="3">
+                            Grade 3
+                        </option>
+
+                        <option value="4">
+                            Grade 4
+                        </option>
+
+                        <option value="5">
+                            Grade 5
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label>
+                        Academic Year
+                    </label>
+
+                    <input
+                        id="p-year"
+                        oninput="pushProfileStream()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                </div>
+
+                <div>
+
+                    <label>
+                        Term
+                    </label>
+
+                    <input
+                        id="p-term"
+                        oninput="pushProfileStream()"
+                        style="width:100%; padding:10px;"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TEACHER MANAGEMENT -->
+        <!-- ============================================== -->
+
+        <div
+            id="teacher-management-panel"
+            style="
+                background:#fff;
+                border-radius:8px;
+                padding:20px;
+                margin-bottom:20px;
+                border:1px solid #cbd5e1;
+            "
+        >
+
+            <h3
+                style="
+                    margin-top:0;
+                    margin-bottom:20px;
+                    color:#1e3a8a;
+                "
+            >
+                Teacher Management
+            </h3>
+
+            <div
+                style="
+                    display:flex;
+                    gap:10px;
+                    margin-bottom:20px;
+                "
+            >
+
+                <input
+                    id="teacher-name"
+                    placeholder="Teacher Full Name"
+                    style="
+                        flex:1;
+                        padding:10px;
+                    "
+                >
+
+                <button
+                    onclick="createTeacher()"
+                    style="
+                        background:#1e3a8a;
+                        color:#fff;
+                        border:none;
+                        padding:10px 15px;
+                        border-radius:5px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    "
+                >
+                    Add Teacher
+                </button>
+
+            </div>
+
+            <div id="teacher-list"></div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TEACHER ASSIGNMENT -->
+        <!-- ============================================== -->
+
+        <div
+            id="teacher-assignment-panel"
+            style="
+                background:#fff;
+                border-radius:8px;
+                padding:20px;
+                margin-bottom:20px;
+                border:1px solid #cbd5e1;
+            "
+        >
+
+            <h3
+                style="
+                    margin-top:0;
+                    margin-bottom:20px;
+                    color:#1e3a8a;
+                "
+            >
+                Teacher Subject Assignment
+            </h3>
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:
+                    repeat(auto-fit,minmax(220px,1fr));
+                    gap:15px;
+                    margin-bottom:20px;
+                "
+            >
+
+                <!-- TEACHER -->
+
+                <div>
+
+                    <label>
+                        Teacher
+                    </label>
+
+                    <select
+                        id="assign-teacher"
+                        style="
+                            width:100%;
+                            padding:10px;
+                        "
+                    ></select>
+
+                </div>
+
+                <!-- SUBJECT -->
+
+                <div>
+
+                    <label>
+                        Subject
+                    </label>
+
+                    <select
+                        id="assign-subject"
+                        style="
+                            width:100%;
+                            padding:10px;
+                        "
+                    ></select>
+
+                </div>
+
+                <!-- GRADE -->
+
+                <div>
+
+                    <label>
+                        Grade
+                    </label>
+
+                    <select
+                        id="assign-grade"
+                        style="
+                            width:100%;
+                            padding:10px;
+                        "
+                    >
+
+                        <option value="1">
+                            Grade 1
+                        </option>
+
+                        <option value="2">
+                            Grade 2
+                        </option>
+
+                        <option value="3">
+                            Grade 3
+                        </option>
+
+                        <option value="4">
+                            Grade 4
+                        </option>
+
+                        <option value="5">
+                            Grade 5
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button
+                onclick="assignTeacherSubject()"
+                style="
+                    background:#16a34a;
+                    color:#fff;
+                    border:none;
+                    padding:10px 15px;
+                    border-radius:5px;
+                    cursor:pointer;
+                    font-weight:bold;
+                "
+            >
+                Assign Teacher
+            </button>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- CURRICULUM -->
+        <!-- ============================================== -->
+
+        <div
+            style="
+                background:#fff;
+                border-radius:8px;
+                padding:20px;
+                border:1px solid #cbd5e1;
+            "
+        >
+
+            <h3
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-top:0;
+                "
+            >
+
+                <span>
+                    Curriculum Management
+                </span>
+
+                <button
+                    onclick="createNewSubjectNode()"
+                    style="
+                        background:#1e3a8a;
+                        color:#fff;
+                        border:none;
+                        padding:10px 15px;
+                        border-radius:5px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    "
+                >
+                    Add Subject
+                </button>
+
+            </h3>
+
             <div id="curriculum-rendering-node"></div>
+
         </div>
-   </div>
 
-<div id="admin-panel" style="display:none;">
-    <h2>Admin Dashboard</h2>
-            
-    <section id="teacher-management">
-    <h3>Add New Teacher</h3>
-    <button onclick="createNewTeacher()" class="btn-primary">
-        Generate New Teacher Account
-    </button>
-</section>
-
-    <section>
-        <h3>System Overview</h3>
-        <table id="teacher-table" border="1">
-            <thead><tr><th>Username</th><th>Default Password</th></tr></thead>
-            <tbody id="teacher-list-body"></tbody>
-        </table>
-
-        <h3>Current Assignments</h3>
-        <table id="assignment-table" border="1">
-            <thead><tr><th>Teacher</th><th>Subject</th></tr></thead>
-            <tbody id="assignment-list-body"></tbody>
-        </table>
-    </section>
-    
-    <section id="teacher-management">
-    <h3>Teacher Management</h3>
-    <button onclick="createNewTeacher()" class="btn-primary">
-        Generate New Teacher Account
-    </button>
-</section>
-</div>
-
-
-        
- 
-
-    <div class="panel" id="view-marks">
-        <div class="card" style="background:#fff; border:1px solid #cbd5e1; padding:20px; border-radius:8px;">
-            <h3 style="margin-bottom:15px;">Student Roster Execution Matrix</h3>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button onclick="createNewStudentNode()" style="padding:8px 14px; background:#16a34a; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">+ Register Single Student</button>
-                <button onclick="executeBulkImport()" style="padding:8px 14px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;">⚡ Bulk Import Line Names</button>
-            </div>
-            <div style="overflow-x:auto; max-height:65vh;">
-                <table id="data-sheet-matrix" style="width:100%; border-collapse:collapse; font-size:12px;"></table>
-            </div>
-        </div>
     </div>
 
-    <div class="panel" id="view-print">
-        <section>
-    <h3>Assign Subject to Teacher</h3>
-    <select id="teacher-dropdown"></select>
-    <select id="subject-dropdown"></select>
-    <button onclick="submitAssignment()">Assign</button>
-</section>
-        <div style="background:#475569; padding:15px; display:flex; gap:15px; align-items:center; border-radius:6px; margin-bottom:20px; color:#fff;">
-            <button onclick="window.print()" style="padding:10px 20px; background:#16a34a; border:none; color:#fff; font-weight:bold; border-radius:4px; cursor:pointer;">🖨 Dispatch Bulk System Print Job</button>
-            <span id="print-counter-flag" style="font-weight:600;"></span>
+    <!-- ================================================== -->
+    <!-- MARKS PANEL -->
+    <!-- ================================================== -->
+
+    <div
+        class="panel"
+        id="view-marks"
+    >
+
+        <div
+            style="
+                background:#fff;
+                border-radius:8px;
+                padding:20px;
+                border:1px solid #cbd5e1;
+            "
+        >
+
+            <h3
+                style="
+                    margin-top:0;
+                    margin-bottom:20px;
+                "
+            >
+                Student Marks Entry
+            </h3>
+
+            <div
+                style="
+                    display:flex;
+                    gap:10px;
+                    margin-bottom:20px;
+                "
+            >
+
+                <button
+                    onclick="createNewStudentNode()"
+                    style="
+                        background:#16a34a;
+                        color:#fff;
+                        border:none;
+                        padding:10px 15px;
+                        border-radius:5px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    "
+                >
+                    Add Student
+                </button>
+
+                <button
+                    onclick="executeBulkImport()"
+                    style="
+                        background:#0284c7;
+                        color:#fff;
+                        border:none;
+                        padding:10px 15px;
+                        border-radius:5px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    "
+                >
+                    Bulk Import
+                </button>
+
+            </div>
+
+            <div
+                style="
+                    overflow-x:auto;
+                    max-height:70vh;
+                "
+            >
+
+                <table
+                    id="data-sheet-matrix"
+                    style="
+                        width:100%;
+                        border-collapse:collapse;
+                        font-size:12px;
+                    "
+                ></table>
+
+            </div>
+
         </div>
-        <div id="print-assembly-node" style="display:flex; flex-direction:column; gap:30px; align-items:center; background:#1e293b; padding:20px 0;"></div>
+
+    </div>
+
+    <!-- ================================================== -->
+    <!-- REPORT PANEL -->
+    <!-- ================================================== -->
+
+    <div
+        class="panel"
+        id="view-print"
+    >
+
+        <div
+            style="
+                background:#475569;
+                padding:15px;
+                border-radius:6px;
+                margin-bottom:20px;
+                color:#fff;
+                display:flex;
+                align-items:center;
+                gap:15px;
+            "
+        >
+
+            <button
+                onclick="window.print()"
+                style="
+                    background:#16a34a;
+                    color:#fff;
+                    border:none;
+                    padding:10px 20px;
+                    border-radius:5px;
+                    cursor:pointer;
+                    font-weight:bold;
+                "
+            >
+                Print Reports
+            </button>
+
+            <span id="print-counter-flag"></span>
+
+        </div>
+
+        <div
+            id="print-assembly-node"
+            style="
+                display:flex;
+                flex-direction:column;
+                gap:30px;
+                align-items:center;
+            "
+        ></div>
+
     </div>
 
 </div>
 
 <script src="app.js"></script>
+
 </body>
 </html>
+```
