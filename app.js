@@ -517,3 +517,40 @@ function shiftPanel(stepNum) {
 }
 
 window.onload = function() { bootstrapApplicationNode(); };
+/**
+ * Fetches and renders the Admin dashboard state.
+ * Call this function whenever the Admin tab is opened or an action is completed.
+ */
+async function loadAdminDashboard() {
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/dashboard-data`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load dashboard');
+        
+        const data = await response.json();
+
+        // 1. Render Teachers List
+        const teacherList = document.getElementById('teacher-list-body');
+        teacherList.innerHTML = data.teachers.map(t => `
+            <tr>
+                <td>${t.username}</td>
+                <td>${t.password}</td>
+            </tr>
+        `).join('');
+
+        // 2. Render Assignments Table
+        const assignmentList = document.getElementById('assignment-list-body');
+        assignmentList.innerHTML = data.assignments.map(a => `
+            <tr>
+                <td>${a.teacher_name}</td>
+                <td>${a.subject_name}</td>
+            </tr>
+        `).join('');
+        
+    } catch (err) {
+        console.error("Dashboard error:", err);
+        alert("Could not load dashboard data.");
+    }
+}
