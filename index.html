@@ -49,13 +49,10 @@
         .btn-s:hover { background: #f8fafc; }
         .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fca5a5; }
         .btn-success { background: #f0fdf4; color: var(--success); border-color: #bbf7d0; }
+        .btn-warning { background: #ffedd5; color: var(--warning); border-color: #fed7aa; }
         .sm-btn { padding: 4px 8px; font-size: 11px; border-radius: 4px; }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        .badge-admin { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
-        .badge-teacher { background: #e0f2fe; color: var(--primary); border: 1px solid #bae6fd; }
-
-        /* Data Matrix Tables */
+        /* Tables */
         .sheet-wrapper { overflow-x: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 6px; margin-top: 10px; }
         table.sheet { border-collapse: collapse; width: 100%; font-size: 12px; background: white; }
         table.sheet th, table.sheet td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
@@ -64,23 +61,10 @@
         
         .assignment-tag { display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); margin: 2px; }
 
-        /* Step Panels Option */
-        #login-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center; }
+        /* Modals */
+        #login-modal, .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center; }
+        .modal-overlay { background: rgba(15,23,42,0.6); display: none; }
         #main-application-content { display: none; }
-        
-        /* Print Styles */
-        #print-area { background: #525659; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 35px; min-height: 100vh; }
-        .report-card { background: white; width: 210mm; min-height: 297mm; padding: 15mm; box-shadow: 0 0 15px rgba(0,0,0,0.3); color: black; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, sans-serif; }
-        .cas-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
-        .cas-table th, .cas-table td { border: 1px solid #000; padding: 6px 8px; }
-        
-        @media print {
-            .navbar, .stepper, .container, .panel, .panel.active { display: none !important; }
-            body { background: transparent !important; padding: 0 !important; margin: 0 !important; }
-            @page { size: A4 portrait; margin: 0; }
-            #print-area { display: block !important; background: transparent !important; padding: 0 !important; }
-            .report-card { box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always !important; }
-        }
     </style>
 </head>
 <body>
@@ -104,9 +88,32 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="edit-teacher-modal">
+    <div style="background:#fff; padding:25px; border-radius:8px; width:100%; max-width:450px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom:15px; border-none;">✏️ Edit Faculty Account Profile</h3>
+        <input type="hidden" id="edit-teacher-index-id">
+        <div class="field">
+            <label>Teacher Full Name</label>
+            <input type="text" id="edit-teacher-name">
+        </div>
+        <div class="field">
+            <label>System Login ID / Username</label>
+            <input type="text" id="edit-teacher-login-id" style="font-weight:bold; color:var(--danger);">
+        </div>
+        <div class="field">
+            <label>Security Password Key</label>
+            <input type="text" id="edit-teacher-password">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button class="btn btn-s" onclick="closeEditTeacherModal()">Cancel</button>
+            <button class="btn btn-p" onclick="adminSubmitTeacherUpdate()">Save Database Changes</button>
+        </div>
+    </div>
+</div>
+
 <div id="main-application-content">
     <div class="navbar">
-        <h1>Sirjana Secondary School — Cloud CAS Marksheet Engine</h1>
+        <h1>Sirjana Secondary School — Cloud CAS Database Engine</h1>
         <div style="display: flex; align-items: center; gap: 15px;">
             <span id="user-display-profile" style="color: white; font-weight: bold; background: #1e293b; padding: 5px 12px; border-radius: 4px; border: 1px solid #475569;">Checking...</span>
             <button class="btn btn-danger sm-btn" onclick="terminateSession()">Logout</button>
@@ -146,7 +153,7 @@
                     </div>
 
                     <div class="card">
-                        <h3>👤 Manage Faculty Teachers & Access Credentials</h3>
+                        <h3>👤 Register Faculty Teachers</h3>
                         <div class="field">
                             <label>Teacher Full Name</label>
                             <input type="text" id="new-teacher-name" placeholder="e.g., Ram Bahadur">
@@ -197,7 +204,7 @@
             <div id="teacher-welcome-dashboard-wrapper" style="display:none;">
                 <div class="card" style="text-align:center; padding:40px;">
                     <h2 style="color:var(--primary); margin-bottom:10px;">Welcome Back, <span id="teacher-welcome-name"></span>!</h2>
-                    <p style="color:#475569; margin-bottom:20px;">Your specialized academic teacher assignment profiles have been loaded securely.</p>
+                    <p style="color:#475569; margin-bottom:20px;">Your specialized academic teacher assignment profiles have been loaded securely from the server.</p>
                     <button class="btn btn-p" onclick="goStep(2)">Proceed directly to Assigned Curriculum Units Setup →</button>
                 </div>
             </div>
@@ -255,7 +262,6 @@
         </div>
 
     </div>
-
     <div id="print-area"></div>
 </div>
 
