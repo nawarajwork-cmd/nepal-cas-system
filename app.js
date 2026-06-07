@@ -201,6 +201,43 @@ function renderCurriculumPanelMarkup() {
     });
 }
 
+// Populate dropdowns with data
+async function populateDropdowns() {
+    const res = await fetch(`${API_BASE}/api/admin/dashboard-data`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+
+    const tDropdown = document.getElementById('teacher-dropdown');
+    const sDropdown = document.getElementById('subject-dropdown');
+
+    tDropdown.innerHTML = data.teachers.map(t => `<option value="${t.id}">${t.username}</option>`).join('');
+    sDropdown.innerHTML = data.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+// Submit assignment
+async function submitAssignment() {
+    const teacher_id = document.getElementById('teacher-dropdown').value;
+    const subject_id = document.getElementById('subject-dropdown').value;
+
+    const res = await fetch(`${API_BASE}/api/admin/assign`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ teacher_id, subject_id })
+    });
+
+    if (res.ok) {
+        alert("Assignment successful!");
+        loadAdminDashboard();
+    } else {
+        alert("Assignment failed.");
+    }
+}
+
+
 // --- DYNAMIC DATA CREATION ROUTERS ---
 async function createNewSubjectNode() {
     const raw = prompt("Enter Unified Subject Code Target Name (e.g., MATHEMATICS, ENGLISH):");
