@@ -116,7 +116,24 @@ async function fetchCloudSystemState() {
         renderCurriculumPanelMarkup();
     } catch (err) { console.error("Global system infrastructure synchronize interruption:", err); }
 }
+// Example of your login handler
+async function handleLogin() {
+    // ... after your fetch call returns successfully:
+    const data = await response.json();
+    
+    // Store token
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', data.role); // Store the role as well
 
+    // Logic for visibility
+    if (data.role === 'admin') {
+        document.getElementById('admin-panel').style.display = 'block';
+        loadAdminDashboard(); // Automatically load data if they are admin
+    } else {
+        document.getElementById('admin-panel').style.display = 'none';
+        // Hide admin panel and show teacher/student dashboard instead
+    }
+}
 // --- DATA SCHEMA PARSING RECURSIONS ---
 function buildNestedCurriculumMap() {
     const map = {};
