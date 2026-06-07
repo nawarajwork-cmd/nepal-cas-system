@@ -1,6 +1,6 @@
 const API_BASE = "https://cas-backend-s9ba.onrender.com/api";
 
-async function login() {
+async function runAuthPipeline()() {
     const username = document.getElementById('user-input').value;
     const password = document.getElementById('pass-input').value;
     const res = await fetch(`${API_BASE}/auth/login`, {
