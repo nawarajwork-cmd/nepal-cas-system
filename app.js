@@ -1,773 +1,673 @@
-// --- CORE CONFIGURATION & CONSTANTS ---
+// --- BACKEND ROUTING SYSTEM CONFIGURATION ---
 const BACKEND_API = "https://cas-backend-s9ba.onrender.com/api";
 
-// Main Reactive State Matrix
-let db = {
-    classes: {},       
-    teachers: [],      
-    students: {}       
+// --- SYSTEM STATE STORAGE CONTAINER ---
+let appState = {
+    classes: {},    // Dynamic format: { "Grade 1": { subjects: { "NEPALI": [..], "ENGLISH": [..] } } }
+    students: [],   // Format: [ { id: 123, name: "Name", class: "Grade 1", marks: { "NEPALI_C0_T0": 3 } } ]
+    teachers: []    // Format: [ { id: "teacher.1", name: "Name", pass: "9876", assignments: [ { class: "Grade 1", subject: "NEPALI" } ] } ]
 };
 
 let currentUser = null; 
+let currentRole = null; // "ADMIN" or "TEACHER"
+let activeClassContext = ""; 
+let activeSubjectContext = ""; 
 
-// --- ACTIVE CLOUD SERVER STATE HANDSHAKE RETRIEVAL ---
-async function loadSystemStateFromServer() {
+// --- INITIAL DATA ORCHESTRATION ON BOOT ---
+async function fetchSystemMasterState() {
     try {
         const response = await fetch(`${BACKEND_API}/admin/database-state`);
         if (response.ok) {
             const serverData = await response.json();
-            if (serverData) {
-                db.classes = serverData.classes || {};
-                db.teachers = serverData.teachers || [];
-                db.students = serverData.students || {};
+            if (serverData && serverData.classes) {
+                appState = serverData;
+            } else {
+                initializeDefaultSchema();
             }
+        } else {
+            initializeDefaultSchema();
         }
     } catch (err) {
-        console.error("Cloud engine handshake offline. Local engine layer rollback fallback active.", err);
+        console.warn("Server unavailable - establishing standalone fallback matrix layers.", err);
+        initializeDefaultSchema();
     }
-
-    // CRITICAL ENGINE REFRESH TRIGGERS: Force instant local element updates across screens
-    refreshControlPanelDropdownsAndViews();
-    refreshCurriculumDropdownSelectors();
-    renderCurriculumStructureSetup();
-    buildMarkMatrixLedger();
-    buildPrintingDashboardControls();
+    populateGlobalDropdownSelectors();
+    renderAdministrativeDashboards();
 }
 
-// Bulk state fallback utility for nested mark matrix changes
-async function syncStateToBackendCloud() {
+function initializeDefaultSchema() {
+    appState.classes = {
+        "Grade 1": {
+            subjects: {
+                "NEPALI": [
+                    { chName: 'Chapter 1 – वर्णमाला र उच्चारण', active: true, themes: ['स्वर वर्ण र मात्रा पहिचान', 'व्यञ्जन वर्ण उच्चारण र लेखन', 'समान ध्वनि भएका शब्द वर्गीकरण'] },
+                    { chName: 'Chapter 2 – शब्द भण्डार र प्रयोग', active: true, themes: ['घरायसी र सामाजिक शब्द प्रयोग', 'विपरीतार्थक शब्द पहिचान', 'सरल वाक्य निर्माण क्षमता'] }
+                ],
+                "ENGLISH": [
+                    { chName: 'Chapter 1 – Phonics and Alphabetics', active: true, themes: ['Letter-sound correspondences', 'Decoding simple CVC words'] }
+                ]
+            }
+        }
+    };
+    if (!appState.students) appState.students = [];
+    if (!appState.teachers) appState.teachers = [];
+}
+
+async function pushStateToServer() {
     try {
         await fetch(`${BACKEND_API}/admin/database-state`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(db)
+            body: JSON.stringify(appState)
         });
     } catch (e) {
-        console.error("Failed to sync structural changes to remote server clusters:", e);
+        console.error("Critical Cloud Sync Interruption:", e);
     }
 }
 
-// --- ADMINISTRATIVE DATA ACTION OPERATIONS WITH LIFECYCLE REFRESHES ---
-
-async function adminCreateClass() {
-    const inp = document.getElementById('new-class-input');
-    const className = inp.value.trim();
-    if (!className) return;
-
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/classes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ className })
-        });
-        
-        if (!response.ok) {
-            const errData = await response.json();
-            alert(errData.error || "Failed to commit class creation structural layer.");
-            return;
-        }
-
-        inp.value = "";
-        // Immediately fetch clean cloud server state and trigger page layout refreshes
-        await loadSystemStateFromServer();
-    } catch (err) {
-        console.error("Network communication failure handling class storage creation:", err);
-    }
-}
-
-async function adminCreateSubject() {
-    const className = document.getElementById('subject-target-class-select').value;
-    const inp = document.getElementById('new-subject-input');
-    const subjectName = inp.value.trim().toUpperCase();
-    
-    if (!className || !subjectName) return;
-
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/subjects`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ className, subjectName })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            alert(errData.error || "Failed to link course subject structure mapping target.");
-            return;
-        }
-
-        inp.value = "";
-        // Immediately pull clean data down and trigger internal directory rebuilds
-        await loadSystemStateFromServer();
-    } catch (err) {
-        console.error("Network failure allocating unique system subject row:", err);
-    }
-}
-
-async function adminCreateTeacherAccount() {
-    const inp = document.getElementById('new-teacher-name');
-    const name = inp.value.trim();
-    if (!name) return;
-
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/teachers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            alert(errData.error || "Failed to finalize structural teacher row entry.");
-            return;
-        }
-
-        inp.value = "";
-        // Fetch new teacher dataset arrays instantly to update access rosters
-        await loadSystemStateFromServer();
-    } catch (err) {
-        console.error("Network interface error registering system faculty account:", err);
-    }
-}
-
-async function adminAssignTeacherCourseRoute() {
-    const tId = document.getElementById('assign-teacher-select').value;
-    const className = document.getElementById('assign-class-select').value;
-    const subjectName = document.getElementById('assign-subject-select').value;
-
-    if (!tId || !className || !subjectName) { 
-        alert("Ensure valid criteria selections across all allocation registry pairs."); 
-        return; 
-    }
-
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/assignments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacherId: tId, className, subjectName })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            alert(errData.error || "Failed mapping routing matrix link.");
-            return;
-        }
-
-        // Complete state lifecycle pull and drop-down option sync
-        await loadSystemStateFromServer();
-    } catch (err) {
-        console.error("Network exception committing structural configuration mapping pairing:", err);
-    }
-}
-
-async function adminDeleteTeacher(id) {
-    if(!confirm("Purge selected faculty profile registry permanently?")) return;
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/teachers/${id}`, { method: 'DELETE' });
-        if(response.ok) {
-            await loadSystemStateFromServer();
-        }
-    } catch (err) {
-        console.error("Error executing collection row removal operation:", err);
-    }
-}
-
-async function adminSubmitTeacherUpdate() {
-    const id = document.getElementById('edit-teacher-index-id').value;
-    const name = document.getElementById('edit-teacher-name').value.trim();
-    const pass = document.getElementById('edit-teacher-password').value.trim();
-
-    try {
-        const response = await fetch(`${BACKEND_API}/admin/teachers/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, pass })
-        });
-        if(response.ok) {
-            closeEditTeacherModal();
-            await loadSystemStateFromServer();
-        }
-    } catch(err) {
-        console.error("Error committing individual profile edits:", err);
-    }
-}
-
-// --- FRONTEND COMPONENT RENDER ENGINE MANIPULATION ---
-
-function refreshControlPanelDropdownsAndViews() {
-    const classList = Object.keys(db.classes || {});
-    
-    // 1. Target Class Selection Dropdown
-    const targetClassSel = document.getElementById('subject-target-class-select');
-    if (targetClassSel) {
-        targetClassSel.innerHTML = "";
-        classList.forEach(c => {
-            let opt = document.createElement('option');
-            opt.value = c; opt.textContent = c;
-            targetClassSel.appendChild(opt);
-        });
-    }
-
-    // 2. Assignment Section Class Selection Dropdown
-    const assignClassSel = document.getElementById('assign-class-select');
-    if (assignClassSel) {
-        const previousAssignClassVal = assignClassSel.value;
-        assignClassSel.innerHTML = "";
-        classList.forEach(c => {
-            let opt = document.createElement('option');
-            opt.value = c; opt.textContent = c;
-            assignClassSel.appendChild(opt);
-        });
-        if (previousAssignClassVal && classList.includes(previousAssignClassVal)) {
-            assignClassSel.value = previousAssignClassVal;
-        }
-    }
-    populateAssignSubjectDropdown();
-
-    // 3. Teacher Allocation Account Picklists
-    const assignTeacherSel = document.getElementById('assign-teacher-select');
-    if (assignTeacherSel) {
-        assignTeacherSel.innerHTML = "";
-        (db.teachers || []).forEach(t => {
-            let opt = document.createElement('option');
-            opt.value = t.id; opt.textContent = t.name;
-            assignTeacherSel.appendChild(opt);
-        });
-    }
-
-    // 4. Structural Setup Core School Lookups Block Render
-    const dirBox = document.getElementById('class-directory-render-box');
-    if (dirBox) {
-        dirBox.innerHTML = "";
-        if (classList.length === 0) {
-            dirBox.innerHTML = `<p style="color:#64748b; font-size:12px;">No active classes or subjects configured on server database tier nodes.</p>`;
-        } else {
-            classList.forEach(className => {
-                let subjectsList = Object.keys(db.classes[className].subjects || {});
-                let row = document.createElement('div');
-                row.style.marginBottom = "10px";
-                row.innerHTML = `<strong>🏫 ${className}</strong>: ${subjectsList.length > 0 ? subjectsList.map(s => `<span class="assignment-tag">${s}</span>`).join('') : '<em style="color:#94a3b8">No course modules registered</em>'}`;
-                dirBox.appendChild(row);
-            });
-        }
-    }
-
-    // 5. Build Registered Teacher Row Matrix Directory Rows
-    const teacherTbody = document.getElementById('teacher-directory-tbody');
-    if (teacherTbody) {
-        teacherTbody.innerHTML = "";
-        if (!db.teachers || db.teachers.length === 0) {
-            teacherTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">No faculty members registered.</td></tr>`;
-        } else {
-            db.teachers.forEach(t => {
-                let tags = (t.assignments || []).map(a => `<span class="assignment-tag">${a.class} (${a.subject})</span>`).join('');
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${t.name}</strong></td>
-                    <td><code>${t.id}</code></td>
-                    <td><code>${t.pass}</code></td>
-                    <td>${tags || '<em style="color:#94a3b8">No Assigned Active Paths</em>'}</td>
-                    <td>
-                        <button class="btn btn-p sm-btn" onclick="openEditTeacherModal('${t.id}', '${t.name}', '${t.pass}')">✏️ Edit</button>
-                        <button class="btn btn-danger sm-btn" onclick="adminDeleteTeacher('${t.id}')">✕</button>
-                    </td>
-                `;
-                teacherTbody.appendChild(tr);
-            });
-        }
-    }
-}
-
-function populateAssignSubjectDropdown() {
-    const classSelectEl = document.getElementById('assign-class-select');
-    const subSel = document.getElementById('assign-subject-select');
-    if (!classSelectEl || !subSel) return;
-    
-    const targetClass = classSelectEl.value;
-    subSel.innerHTML = "";
-    if (targetClass && db.classes[targetClass] && db.classes[targetClass].subjects) {
-        Object.keys(db.classes[targetClass].subjects).forEach(s => {
-            let opt = document.createElement('option');
-            opt.value = s; opt.textContent = s;
-            subSel.appendChild(opt);
-        });
-    }
-}
-
-// --- CURRICULUM SETUP CONTROLS PANEL ROUTING ---
-
-function refreshCurriculumDropdownSelectors() {
-    const classSel = document.getElementById('global-class-selector');
-    const subSel = document.getElementById('global-subject-selector');
-    if (!classSel || !subSel) return;
-    
-    let previousClass = classSel.value;
-    let previousSub = subSel.value;
-
-    classSel.innerHTML = "";
-    subSel.innerHTML = "";
-
-    let availableClasses = [];
-    if (currentUser && currentUser.role === 'TEACHER') {
-        let mappedClasses = new Set();
-        (currentUser.assignments || []).forEach(a => mappedClasses.add(a.class));
-        availableClasses = Array.from(mappedClasses);
-    } else {
-        availableClasses = Object.keys(db.classes || {});
-    }
-
-    availableClasses.forEach(c => {
-        let opt = document.createElement('option');
-        opt.value = c; opt.textContent = c;
-        classSel.appendChild(opt);
-    });
-
-    if (previousClass && availableClasses.includes(previousClass)) {
-        classSel.value = previousClass;
-    }
-
-    handleGlobalClassChange(false);
-    if (previousSub && [...subSel.options].some(o => o.value === previousSub)) {
-        subSel.value = previousSub;
-    }
-}
-
-function handleGlobalClassChange(shouldTriggerRender = true) {
-    const classSel = document.getElementById('global-class-selector');
-    const subSel = document.getElementById('global-subject-selector');
-    if(!classSel || !subSel) return;
-
-    const targetClass = classSel.value;
-    subSel.innerHTML = "";
-
-    if (!targetClass || !db.classes[targetClass]) return;
-
-    let subjectsToLoad = [];
-    if (currentUser && currentUser.role === 'TEACHER') {
-        (currentUser.assignments || []).forEach(a => {
-            if (a.class === targetClass) subjectsToLoad.push(a.subject);
-        });
-    } else {
-        subjectsToLoad = Object.keys(db.classes[targetClass].subjects || {});
-    }
-
-    subjectsToLoad.forEach(s => {
-        let opt = document.createElement('option');
-        opt.value = s; opt.textContent = s;
-        subSel.appendChild(opt);
-    });
-
-    if (shouldTriggerRender) {
-        renderCurriculumStructureSetup();
-        buildMarkMatrixLedger();
-    }
-}
-
-function renderCurriculumStructureSetup() {
-    const container = document.getElementById('subject-mapping-container');
-    if (!container) return;
-    container.innerHTML = "";
-
-    const activeClass = document.getElementById('global-class-selector')?.value;
-    const activeSub = document.getElementById('global-subject-selector')?.value;
-
-    if (!activeClass || !activeSub || !db.classes[activeClass] || !db.classes[activeClass].subjects[activeSub]) {
-        container.innerHTML = `<p style="padding:15px; color:#64748b;">No curriculum structure mapping configuration matches criteria metrics context.</p>`;
-        return;
-    }
-
-    let chapters = db.classes[activeClass].subjects[activeSub];
-
-    chapters.forEach((ch, chIdx) => {
-        let chBox = document.createElement('div');
-        chBox.style.background = "#fafafa";
-        chBox.style.border = "1px solid #cbd5e1";
-        chBox.style.padding = "15px";
-        chBox.style.borderRadius = "6px";
-        chBox.style.marginBottom = "15px";
-
-        let themesHTML = ch.themes.map((th, thIdx) => `
-            <div style="display:flex; gap:10px; margin-bottom:8px; padding-left:20px; align-items:center;">
-                <span style="color:#cbd5e1;">⬤</span>
-                <input type="text" value="${th}" onchange="updateThemeString('${activeClass}', '${activeSub}', ${chIdx}, ${thIdx}, this.value)" style="font-size:12px; padding:4px 8px;">
-                <button class="btn btn-danger sm-btn" onclick="deleteThemeRoute('${activeClass}', '${activeSub}', ${chIdx}, ${thIdx})">✕</button>
-            </div>
-        `).join('');
-
-        chBox.innerHTML = `
-            <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
-                <input type="checkbox" ${ch.active ? 'checked' : ''} onchange="toggleChapterActive('${activeClass}', '${activeSub}', ${chIdx}, this.checked)" style="width:auto;">
-                <input type="text" value="${ch.chName}" onchange="updateChapterString('${activeClass}', '${activeSub}', ${chIdx}, this.value)" style="font-weight:bold; width:70%;">
-                <button class="btn btn-success sm-btn" onclick="addThemeNode('${activeClass}', '${activeSub}', ${chIdx})">+ Add Theme Criterion</button>
-                <button class="btn btn-danger sm-btn" onclick="deleteChapterRoute('${activeClass}', '${activeSub}', ${chIdx})">Delete Chapter</button>
-            </div>
-            <div>${themesHTML}</div>
-        `;
-        container.appendChild(chBox);
-    });
-
-    let addChBtn = document.createElement('button');
-    addChBtn.className = "btn btn-p sm-btn";
-    addChBtn.style.marginTop = "5px";
-    addChBtn.textContent = "+ Append Structural Chapter Block Unit";
-    addChBtn.onclick = () => {
-        chapters.push({ chName: "New Module Segment Heading Unit", active: true, themes: ["New Specific Evaluation Metric Point"] });
-        syncStateToBackendCloud();
-        renderCurriculumStructureSetup();
-        buildMarkMatrixLedger();
-    };
-    container.appendChild(addChBtn);
-}
-
-function toggleChapterActive(c, s, cIdx, val) { db.classes[c].subjects[s][cIdx].active = val; syncStateToBackendCloud(); buildMarkMatrixLedger(); }
-// Use standard text processing directly to keep inline character composition lightweight
-function updateChapterString(c, s, cIdx, val) { db.classes[c].subjects[s][cIdx].chName = val; syncStateToBackendCloud(); }
-function updateThemeString(c, s, cIdx, tIdx, val) { db.classes[c].subjects[s][cIdx].themes[tIdx] = val; syncStateToBackendCloud(); }
-function addThemeNode(c, s, cIdx) { db.classes[c].subjects[s][cIdx].themes.push("New Operational Assessment Metric Attribute"); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
-function deleteChapterRoute(c, s, cIdx) { db.classes[c].subjects[s].splice(cIdx, 1); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
-function deleteThemeRoute(c, s, cIdx, tIdx) { db.classes[c].subjects[s][cIdx].themes.splice(tIdx, 1); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
-
-// --- SECURE MATRIX ASSESSMENT ENTRIES SHEET ---
-
-function buildMarkMatrixLedger() {
-    const table = document.getElementById('matrix-table');
-    if (!table) return;
-    table.innerHTML = "";
-
-    const activeClass = document.getElementById('global-class-selector')?.value;
-    const activeSub = document.getElementById('global-subject-selector')?.value;
-
-    if (!activeClass || !activeSub || !db.classes[activeClass] || !db.classes[activeClass].subjects[activeSub]) {
-        table.innerHTML = `<tr><td style="padding:15px; color:#64748b;">No structural context active to display evaluating parameters matrix spreadsheet.</td></tr>`;
-        return;
-    }
-
-    let chs = db.classes[activeClass].subjects[activeSub];
-    
-    let h1 = `<tr><th rowspan="3" style="width:45px;">S.N.</th><th rowspan="3" style="min-width:180px;">Full Legal Student Name</th><th rowspan="3" style="width:75px;">Roll No</th>`;
-    let h2 = `<tr>`;
-    let h3 = `<tr>`;
-
-    let activeChaptersCount = 0;
-    chs.forEach((ch, cIdx) => {
-        if (!ch.active) return;
-        activeChaptersCount++;
-        let themeCount = ch.themes.length;
-        h1 += `<th colspan="${themeCount + 1}" style="text-align:center; background:#1e3a8a;">${ch.chName}</th>`;
-        ch.themes.forEach(th => {
-            h3 += `<th style="background:#475569; font-size:10px; font-weight:normal; max-width:120px; white-space:normal; text-align:center;">${th}</th>`;
-        });
-        h2 += `<th colspan="${themeCount}" style="background:#334155; text-align:center; font-size:10px;">Evaluation Parameters</th><th rowspan="2" class="ch-avg-col" style="background:#0f172a; color:white;">Ch Avg</th>`;
-    });
-
-    h1 += `</tr>`; h2 += `</tr>`; h3 += `</tr>`;
-    table.innerHTML = `<thead>${h1}${h2}${h3}</thead><tbody id="matrix-body-rows"></tbody>`;
-
-    const tbody = document.getElementById('matrix-body-rows');
-    let studentsList = db.students[activeClass] || [];
-
-    if (studentsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${5 + (activeChaptersCount * 5)}" style="text-align:center; color:#64748b; padding:20px;">No student records attached to this class. Append a student row to begin entering metrics.</td></tr>`;
-        return;
-    }
-
-    studentsList.forEach((stud, sIdx) => {
-        let tr = document.createElement('tr');
-        let cells = `<td>${sIdx + 1}</td>
-            <td><input type="text" value="${stud.name || ''}" onchange="updateStudentMetaDataContext(${sIdx}, 'name', this.value)" style="font-weight:600;"></td>
-            <td><input type="number" value="${stud.roll || ''}" onchange="updateStudentMetaDataContext(${sIdx}, 'roll', this.value)" style="text-align:center;"></td>`;
-
-        chs.forEach((ch, cIdx) => {
-            if (!ch.active) return;
-            let total = 0; let count = 0;
-            ch.themes.forEach((th, tIdx) => {
-                let scoreKey = `${activeSub}_C${cIdx}_T${tIdx}`;
-                let scoreVal = stud.marks[scoreKey] !== undefined ? stud.marks[scoreKey] : "";
-                
-                if (scoreVal !== "") { total += parseFloat(scoreVal); count++; }
-                
-                cells += `<td><input type="number" class="mark-input" min="1" max="4" value="${scoreVal}" oninput="liveMatrixScoreCalculation(this, ${sIdx}, '${scoreKey}', '${activeClass}', '${activeSub}', ${cIdx})"></td>`;
-            });
-            let avg = count > 0 ? (total / count).toFixed(2) : "—";
-            cells += `<td class="ch-avg-col" id="avg_${sIdx}_C${cIdx}">${avg}</td>`;
-        });
-
-        tr.innerHTML = cells;
-        tbody.appendChild(tr);
-    });
-}
-
-function updateStudentMetaDataContext(sIdx, field, val) {
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (db.students[activeClass] && db.students[activeClass][sIdx]) {
-        db.students[activeClass][sIdx][field] = val;
-        syncStateToBackendCloud();
-    }
-}
-
-function liveMatrixScoreCalculation(inputEl, sIdx, scoreKey, className, subName, cIdx) {
-    let val = inputEl.value.trim();
-    if (val === "") {
-        delete db.students[className][sIdx].marks[scoreKey];
-    } else {
-        let numericValue = parseFloat(val);
-        if (numericValue < 1 || numericValue > 4) { inputEl.style.background = "#fee2e2"; return; }
-        inputEl.style.background = "";
-        db.students[className][sIdx].marks[scoreKey] = numericValue;
-    }
-
-    let ch = db.classes[className].subjects[subName][cIdx];
-    let total = 0; let count = 0;
-    ch.themes.forEach((_, tIdx) => {
-        let s = db.students[className][sIdx].marks[`${subName}_C${cIdx}_T${tIdx}`];
-        if (s !== undefined && s !== "") { total += parseFloat(s); count++; }
-    });
-
-    const targetAvgCell = document.getElementById(`avg_${sIdx}_C${cIdx}`);
-    if (targetAvgCell) targetAvgCell.textContent = count > 0 ? (total / count).toFixed(2) : "—";
-}
-
-function addNewStudent() {
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (!activeClass) { alert("Create or choose a target Class environment context node first."); return; }
-    if (!db.students[activeClass]) db.students[activeClass] = [];
-
-    db.students[activeClass].push({
-        id: Date.now() + Math.random(),
-        name: "",
-        roll: db.students[activeClass].length + 1,
-        marks: {}
-    });
-
-    syncStateToBackendCloud();
-    buildMarkMatrixLedger();
-}
-
-function importBulkStudents() {
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (!activeClass) return;
-    let raw = prompt("Paste student names (one per line):");
-    if (!raw) return;
-
-    let lines = raw.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-    if (!db.students[activeClass]) db.students[activeClass] = [];
-
-    lines.forEach(name => {
-        db.students[activeClass].push({
-            id: Date.now() + Math.random(),
-            name: name,
-            roll: db.students[activeClass].length + 1,
-            marks: {}
-        });
-    });
-
-    syncStateToBackendCloud();
-    buildMarkMatrixLedger();
-}
-
-async function saveActiveMarksToStorage() {
-    await syncStateToBackendCloud();
-    alert("Local workspace evaluation metrics synchronized smoothly with the cloud architecture cluster.");
-}
-
-// --- REPORT CARD COMPILATION DISPLAY CENTER PRINT ENGINE ---
-
-function buildPrintingDashboardControls() {
-    const grid = document.getElementById('print-student-checkbox-grid');
-    if (!grid) return;
-    grid.innerHTML = "";
-    
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (!activeClass || !db.students[activeClass] || db.students[activeClass].length === 0) {
-        grid.innerHTML = `<p style="color:#64748b; font-size:12px; padding:10px;">No available student workspace metrics compiled to run layout cards.</p>`;
-        return;
-    }
-
-    db.students[activeClass].forEach(st => {
-        let lbl = document.createElement('label');
-        lbl.style.display = "flex"; lbl.style.alignItems = "center"; lbl.style.gap = "8px";
-        lbl.style.padding = "6px"; lbl.style.background = "#f8fafc"; lbl.style.borderRadius = "4px";
-        lbl.innerHTML = `<input type="checkbox" checked value="${st.id}" class="print-student-selector-chk" style="width:auto;"> Row ${st.roll}: ${st.name || 'Unnamed'}`;
-        lbl.querySelector('input').onchange = () => compileReportSheetsDOM();
-        grid.appendChild(lbl);
-    });
-    compileReportSheetsDOM();
-}
-
-function compileReportSheetsDOM() {
-    const area = document.getElementById('print-area');
-    if (!area) return;
-    area.innerHTML = "";
-
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (!activeClass || !db.students[activeClass]) return;
-
-    const selectedStyle = document.getElementById('print-layout-mode').value;
-    const checkedIds = Array.from(document.querySelectorAll('.print-student-selector-chk:checked')).map(el => parseFloat(el.value));
-
-    let targets = db.students[activeClass].filter(s => checkedIds.includes(s.id));
-
-    targets.forEach(student => {
-        let card = document.createElement('div');
-        card.className = "report-card";
-
-        let headerHTML = `
-            <div style="text-align:center; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:10px;">
-                <h2 style="text-transform:uppercase; font-size:18px; color:var(--primary);">Sirjana Secondary School Evaluation Profile</h2>
-                <p style="font-size:11px; color:#475569;">Bharatpur-9, Chitwan, Nepal | CAS Continuous Assessment System Ledger</p>
-                <div style="display:flex; justify-content:space-between; margin-top:15px; font-size:12px; font-weight:bold; background:#f1f5f9; padding:6px 12px; border-radius:4px;">
-                    <span>Student Name: ${student.name || '____________'}</span>
-                    <span>Class Scope: ${activeClass}</span>
-                    <span>Roll No: ${student.roll}</span>
-                </div>
-            </div>
-        `;
-
-        let bodyTableHTML = "";
-        if (selectedStyle === "CONSOLIDATED") {
-            bodyTableHTML = `<table class="sheet"><thead><tr><th>Course Domain Subject</th><th>Overall Formative Achievement Band Status</th></tr></thead><tbody>`;
-            Object.keys(db.classes[activeClass].subjects || {}).forEach(sub => {
-                let totalSum = 0; let totalCount = 0;
-                db.classes[activeClass].subjects[sub].forEach((ch, cIdx) => {
-                    if (!ch.active) return;
-                    ch.themes.forEach((_, tIdx) => {
-                        let sc = student.marks[`${sub}_C${cIdx}_T${tIdx}`];
-                        if (sc !== undefined && sc !== "") { totalSum += parseFloat(sc); totalCount++; }
-                    });
-                });
-                let finalAvg = totalCount > 0 ? (totalSum / totalCount).toFixed(2) : "Unevaluated";
-                bodyTableHTML += `<tr><td><strong>${sub}</strong></td><td><strong>${finalAvg}</strong></td></tr>`;
-            });
-            bodyTableHTML += `</tbody></table>`;
-        } else {
-            bodyTableHTML = `<table class="sheet"><thead><tr><th>Subject / Chapter Module Units</th><th>Achievement Progress Metric Scale Band Rating</th></tr></thead><tbody>`;
-            Object.keys(db.classes[activeClass].subjects || {}).forEach(sub => {
-                bodyTableHTML += `<tr style="background:#e2e8f0;"><td colspan="2"><strong>📚 Subject Core: ${sub}</strong></td></tr>`;
-                db.classes[activeClass].subjects[sub].forEach((ch, cIdx) => {
-                    if (!ch.active) return;
-                    let chSum = 0; let chCount = 0;
-                    ch.themes.forEach((_, tIdx) => {
-                        let sc = student.marks[`${sub}_C${cIdx}_T${tIdx}`];
-                        if (sc !== undefined && sc !== "") { chSum += parseFloat(sc); chCount++; }
-                    });
-                    let chAvg = chCount > 0 ? (chSum / chCount).toFixed(2) : "—";
-                    bodyTableHTML += `<tr><td style="padding-left:20px;">• ${ch.chName}</td><td><strong>${chAvg}</strong></td></tr>`;
-                });
-            });
-            bodyTableHTML += `</tbody></table>`;
-        }
-
-        let footerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-top:50px; font-size:11px; border-top:1px dashed #cbd5e1; padding-top:20px;">
-                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">Class Teacher</div>
-                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">School Seal</div>
-                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">Principal Approval</div>
-            </div>
-        `;
-
-        card.innerHTML = headerHTML + bodyTableHTML + footerHTML;
-        area.appendChild(card);
-    });
-}
-
-function executeSystemPrintJob() {
-    const activeClass = document.getElementById('global-class-selector').value;
-    if (!activeClass || !db.students[activeClass] || db.students[activeClass].length === 0) {
-        alert("Compile performance criteria sheets inside desk views before pushing data fields downstream to hardware print queues.");
-        return;
-    }
-    window.print();
-}
-
-// --- PORTAL LOGIN SECURITY VALIDATION PIPELINE ---
-
+// --- AUTHENTICATION CORRIDOR PROCESSING PIPELINE ---
 function runAuthPipeline() {
-    const userInp = document.getElementById('user-input').value.trim();
-    const passInp = document.getElementById('pass-input').value.trim();
-    const errEl = document.getElementById('auth-error');
+    const userField = document.getElementById('user-input').value.trim();
+    const passField = document.getElementById('pass-input').value.trim();
+    const errBox = document.getElementById('auth-error');
 
-    if (userInp === "admin" && passInp === "admin123") {
-        currentUser = { role: "ADMIN", name: "System Administrator Node" };
-        launchAuthorizedApplicationSession();
-    } else {
-        let teacher = db.teachers.find(t => t.id === userInp && t.pass === passInp);
-        if (teacher) {
-            currentUser = { role: "TEACHER", id: teacher.id, name: teacher.name, assignments: teacher.assignments || [] };
-            launchAuthorizedApplicationSession();
-        } else {
-            errEl.textContent = "Authentication credentials rejected. Re-enter authorization access tokens.";
-            errEl.style.display = "block";
-        }
+    if (userField === 'admin' && passField === 'admin') {
+        currentUser = { name: "System Administrator", id: "admin" };
+        currentRole = "ADMIN";
+        completeSessionAuthorization();
+        return;
     }
+
+    const teacher = appState.teachers.find(t => t.id === userField && t.pass === passField);
+    if (teacher) {
+        currentUser = teacher;
+        currentRole = "TEACHER";
+        completeSessionAuthorization();
+        return;
+    }
+
+    errBox.textContent = "CRITICAL FAILURE: Invalid node credentials.";
+    errBox.style.display = 'block';
 }
 
-function launchAuthorizedApplicationSession() {
-    document.getElementById('login-modal').style.display = "none";
-    document.getElementById('main-application-content').style.display = "block";
-    document.getElementById('user-display-profile').textContent = `👤 ${currentUser.name} (${currentUser.role})`;
+function completeSessionAuthorization() {
+    document.getElementById('login-modal').style.display = 'none';
+    document.getElementById('main-application-content').style.display = 'block';
+    document.getElementById('user-display-profile').textContent = `🛡️ Profile: ${currentUser.name} (${currentRole})`;
+    
+    const adminWrapper = document.getElementById('admin-only-dashboard-wrapper');
+    const teacherWrapper = document.getElementById('teacher-welcome-dashboard-wrapper');
 
-    if (currentUser.role === "TEACHER") {
-        document.getElementById('admin-only-dashboard-wrapper').style.display = "none";
-        document.getElementById('teacher-welcome-dashboard-wrapper').style.display = "block";
+    if (currentRole === "ADMIN") {
+        adminWrapper.style.display = "block";
+        teacherWrapper.style.display = "none";
+        document.getElementById('admin-add-student-row-btn').style.display = "inline-flex";
+        document.getElementById('admin-bulk-student-btn').style.display = "inline-flex";
+    } else {
+        adminWrapper.style.display = "none";
+        teacherWrapper.style.display = "block";
         document.getElementById('teacher-welcome-name').textContent = currentUser.name;
         document.getElementById('admin-add-student-row-btn').style.display = "none";
         document.getElementById('admin-bulk-student-btn').style.display = "none";
-    } else {
-        document.getElementById('admin-only-dashboard-wrapper').style.display = "block";
-        document.getElementById('teacher-welcome-dashboard-wrapper').style.display = "none";
-        document.getElementById('admin-add-student-row-btn').style.display = "inline-flex";
-        document.getElementById('admin-bulk-student-btn').style.display = "inline-flex";
     }
 
-    refreshCurriculumDropdownSelectors();
+    populateGlobalDropdownSelectors();
     goStep(1);
 }
 
 function terminateSession() {
     currentUser = null;
-    document.getElementById('user-input').value = "";
-    document.getElementById('pass-input').value = "";
-    document.getElementById('auth-error').style.display = "none";
-    document.getElementById('login-modal').style.display = "flex";
-    document.getElementById('main-application-content').style.display = "none";
-    document.getElementById('print-area').style.display = "none";
+    currentRole = null;
+    document.getElementById('user-input').value = '';
+    document.getElementById('pass-input').value = '';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('login-modal').style.display = 'flex';
+    document.getElementById('main-application-content').style.display = 'none';
 }
 
-function openEditTeacherModal(id, name, pass) {
-    document.getElementById('edit-teacher-index-id').value = id;
-    document.getElementById('edit-teacher-name').value = name;
-    document.getElementById('edit-teacher-login-id').value = id; 
-    document.getElementById('edit-teacher-password').value = pass;
-    document.getElementById('edit-teacher-modal').style.display = "flex";
-}
-function closeEditTeacherModal() { document.getElementById('edit-teacher-modal').style.display = "none"; }
+// --- DROPDOWN MATRIX FILL ROUTINES ---
+function populateGlobalDropdownSelectors() {
+    const classes = Object.keys(appState.classes);
+    
+    // 1. Core Controls selectors
+    const classTargetSelect = document.getElementById('subject-target-class-select');
+    const assignClassSelect = document.getElementById('assign-class-select');
+    const globalClassSelector = document.getElementById('global-class-selector');
+    
+    let classOptions = "";
+    classes.forEach(c => { classOptions += `<option value="${c}">${c}</option>`; });
+    
+    if(classTargetSelect) classTargetSelect.innerHTML = classOptions;
+    if(assignClassSelect) assignClassSelect.innerHTML = classOptions;
+    if(globalClassSelector) globalClassSelector.innerHTML = classOptions;
 
-// --- GLOBAL NAVIGATION MANAGER ---
+    // Populate assignment options
+    const assignTeacherSelect = document.getElementById('assign-teacher-select');
+    if (assignTeacherSelect) {
+        let tOpts = "";
+        appState.teachers.forEach(t => { tOpts += `<option value="${t.id}">${t.name}</option>`; });
+        assignTeacherSelect.innerHTML = tOpts;
+    }
+
+    populateAssignSubjectDropdown();
+    handleGlobalClassChange();
+}
+
+function populateAssignSubjectDropdown() {
+    const cls = document.getElementById('assign-class-select').value;
+    const select = document.getElementById('assign-subject-select');
+    if (!cls || !appState.classes[cls] || !select) return;
+
+    let opts = "";
+    Object.keys(appState.classes[cls].subjects).forEach(s => {
+        opts += `<option value="${s}">${s}</option>`;
+    });
+    select.innerHTML = opts;
+}
+
+function handleGlobalClassChange() {
+    const cls = document.getElementById('global-class-selector').value;
+    activeClassContext = cls;
+    const subSelect = document.getElementById('global-subject-selector');
+    if(!cls || !appState.classes[cls] || !subSelect) return;
+
+    let opts = "";
+    Object.keys(appState.classes[cls].subjects).forEach(s => {
+        if (currentRole === "TEACHER") {
+            const hasRule = currentUser.assignments.some(a => a.class === cls && a.subject === s);
+            if (!hasRule) return;
+        }
+        opts += `<option value="${s}">${s}</option>`;
+    });
+    subSelect.innerHTML = opts;
+    activeSubjectContext = subSelect.value;
+    
+    renderCurriculumStructureSetup();
+}
+
+function handleGlobalClassSubjectScopeReset() {
+    activeSubjectContext = document.getElementById('global-subject-selector').value;
+    renderCurriculumStructureSetup();
+}
+
+// --- SYSTEM CONFIGURATION METHODS (ADMIN ROUTINGS) ---
+async function adminCreateClass() {
+    const name = document.getElementById('new-class-input').value.trim();
+    if (!name) return;
+    if (appState.classes[name]) { alert("Class exists."); return; }
+
+    appState.classes[name] = { subjects: {} };
+    document.getElementById('new-class-input').value = '';
+    await pushStateToServer();
+    populateGlobalDropdownSelectors();
+    renderAdministrativeDashboards();
+}
+
+async function adminCreateSubject() {
+    const cls = document.getElementById('subject-target-class-select').value;
+    const subName = document.getElementById('new-subject-input').value.trim().toUpperCase();
+    if (!cls || !subName) return;
+
+    if (!appState.classes[cls].subjects[subName]) {
+        appState.classes[cls].subjects[subName] = [
+            { chName: 'Chapter 1 – Unit Introduction', active: true, themes: ['Theme Core Competency Evaluation Matrix Parameters'] }
+        ];
+    }
+    document.getElementById('new-subject-input').value = '';
+    await pushStateToServer();
+    populateGlobalDropdownSelectors();
+    renderAdministrativeDashboards();
+}
+
+async function adminCreateTeacherAccount() {
+    const name = document.getElementById('new-teacher-name').value.trim();
+    if (!name) return;
+
+    const tId = `teacher.${appState.teachers.length + 1}`;
+    const newTeacher = { id: tId, name: name, pass: "9876", assignments: [] };
+    appState.teachers.push(newTeacher);
+    
+    document.getElementById('new-teacher-name').value = '';
+    await pushStateToServer();
+    populateGlobalDropdownSelectors();
+    renderAdministrativeDashboards();
+}
+
+async function adminAssignTeacherCourseRoute() {
+    const tId = document.getElementById('assign-teacher-select').value;
+    const cls = document.getElementById('assign-class-select').value;
+    const sub = document.getElementById('assign-subject-select').value;
+    if (!tId || !cls || !sub) return;
+
+    const teacher = appState.teachers.find(t => t.id === tId);
+    if (teacher) {
+        const ruleExists = teacher.assignments.some(a => a.class === cls && a.subject === sub);
+        if (!ruleExists) {
+            teacher.assignments.push({ class: cls, subject: sub });
+            await pushStateToServer();
+            renderAdministrativeDashboards();
+        }
+    }
+}
+
+async function adminDeleteTeacherRow(id) {
+    if(!confirm("Remove this teacher profile allocation permanently?")) return;
+    appState.teachers = appState.teachers.filter(t => t.id !== id);
+    await pushStateToServer();
+    renderAdministrativeDashboards();
+}
+
+// --- DIRECTORY UI RENDERING MATRIX ---
+function renderAdministrativeDashboards() {
+    const dirBox = document.getElementById('class-directory-render-box');
+    const teacherTbody = document.getElementById('teacher-directory-tbody');
+    
+    if(dirBox) {
+        dirBox.innerHTML = '';
+        Object.keys(appState.classes).forEach(cName => {
+            const div = document.createElement('div');
+            div.style.marginBottom = '12px';
+            let subs = Object.keys(appState.classes[cName].subjects).map(s => 
+                `<span class="assignment-tag">${s}</span>`
+            ).join(' ');
+            div.innerHTML = `<strong>📁 ${cName}:</strong><div style="margin-top:4px;">${subs || '<em style="color:#94a3b8">No subjects defined</em>'}</div>`;
+            dirBox.appendChild(div);
+        });
+    }
+
+    if(teacherTbody) {
+        teacherTbody.innerHTML = '';
+        appState.teachers.forEach(t => {
+            const tr = document.createElement('tr');
+            let maps = t.assignments.map(a => `${a.class} (${a.subject})`).join(', ');
+            tr.innerHTML = `
+                <td><b>${t.name}</b></td>
+                <td><code>${t.id}</code></td>
+                <td><code>${t.pass}</code></td>
+                <td><small>${maps || 'None allocated'}</small></td>
+                <td><button class="btn btn-danger sm-btn" onclick="adminDeleteTeacherRow('${t.id}')">✕</button></td>
+            `;
+            teacherTbody.appendChild(tr);
+        });
+    }
+}
+
+// --- PANEL STEPPER CONTROL ENGINE ---
 function goStep(stepNum) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById(`st-${stepNum}`).classList.add('active');
-
-    const printArea = document.getElementById('print-area');
-
+    
     if (stepNum === 1) {
         document.getElementById('panel-admin').classList.add('active');
-        if (printArea) printArea.style.display = "none";
+        renderAdministrativeDashboards();
     } else if (stepNum === 2) {
-        refreshCurriculumDropdownSelectors();
         document.getElementById('panel-setup').classList.add('active');
-        if (printArea) printArea.style.display = "none";
+        if (document.getElementById('global-subject-selector').value) {
+            activeSubjectContext = document.getElementById('global-subject-selector').value;
+        }
+        renderCurriculumStructureSetup();
     } else if (stepNum === 3) {
-        buildMarkMatrixLedger();
         document.getElementById('panel-marks').classList.add('active');
-        if (printArea) printArea.style.display = "none";
+        buildMarkMatrixLedger();
     } else if (stepNum === 4) {
         document.getElementById('panel-print').classList.add('active');
         buildPrintingDashboardControls();
-        if (printArea) printArea.style.display = "flex";
     }
 }
 
-// System Boot Initialization Engine Row Handshake
+// --- SUBJECT SCHEMATIC RENDERING ENGINE ---
+function renderCurriculumStructureSetup() {
+    const container = document.getElementById('subject-mapping-container');
+    if (!container) return; container.innerHTML = '';
+    
+    activeClassContext = document.getElementById('global-class-selector').value;
+    activeSubjectContext = document.getElementById('global-subject-selector').value;
+
+    if (!activeClassContext || !activeSubjectContext || !appState.classes[activeClassContext]) {
+        container.innerHTML = `<p style="color:#64748b; padding:10px;">No operational configurations targeted.</p>`;
+        return;
+    }
+
+    const subData = appState.classes[activeClassContext].subjects[activeSubjectContext] || [];
+    const subBox = document.createElement('div');
+    subBox.className = 'subject-box';
+    
+    let chHTML = '';
+    subData.forEach((ch, chIdx) => {
+        let thHTML = '';
+        ch.themes.forEach((th, thIdx) => {
+            thHTML += `
+                <div class="theme-row">
+                    <span style="color:#94a3b8; font-size:11px;">⬤</span>
+                    <input type="text" value="${th}" onchange="updateThemeString(${chIdx}, ${thIdx}, this.value)" style="flex:1; padding:4px 8px; font-size:12px;">
+                </div>`;
+        });
+
+        chHTML += `
+            <div class="chapter-box">
+                <div class="chapter-hdr">
+                    <label class="chk-container">
+                        <input type="checkbox" ${ch.active ? 'checked' : ''} onchange="toggleChapterActive(${chIdx}, this.checked)"> Active
+                    </label>
+                    <input type="text" value="${ch.chName}" onchange="updateChapterString(${chIdx}, this.value)" style="flex:1; font-weight:bold; font-size:13px; padding:4px 8px;">
+                </div>
+                <div class="themes-container">${thHTML}</div>
+            </div>`;
+    });
+
+    subBox.innerHTML = `
+        <div class="subject-hdr">
+            <span>📚 ${activeSubjectContext} Unit Tree Matrix Overview</span>
+            <button class="btn btn-p sm-btn" onclick="addNewChapterNode()">+ Append Structural Chapter Unit</button>
+        </div>
+        <div style="padding-bottom:10px;">${chHTML || '<p style="padding:15px; color:#94a3b8">No chapters initialized.</p>'}</div>
+    `;
+    container.appendChild(subBox);
+}
+
+function addNewChapterNode() {
+    if (!appState.classes[activeClassContext].subjects[activeSubjectContext]) return;
+    const themesCount = prompt("How many structural themes/criteria lines are contained in this chapter?", "2");
+    let arr = [];
+    let count = parseInt(themesCount) || 1;
+    for(let i=0; i<count; i++) { arr.push(`Assessment Evaluation Objective Guideline Rule ${i+1}`); }
+
+    appState.classes[activeClassContext].subjects[activeSubjectContext].push({
+        chName: `Chapter ${appState.classes[activeClassContext].subjects[activeSubjectContext].length + 1} — New Unit Title Spec`,
+        active: true,
+        themes: arr
+    });
+    pushStateToServer();
+    renderCurriculumStructureSetup();
+}
+
+function toggleChapterActive(chIdx, val) { appState.classes[activeClassContext].subjects[activeSubjectContext][chIdx].active = val; pushStateToServer(); }
+function updateChapterString(chIdx, val) { appState.classes[activeClassContext].subjects[activeSubjectContext][chIdx].chName = val; pushStateToServer(); }
+function updateThemeString(chIdx, thIdx, val) { appState.classes[activeClassContext].subjects[activeSubjectContext][chIdx].themes[thIdx] = val; pushStateToServer(); }
+
+// --- DATA ENTRY MATRIX ENGINE ---
+function buildMarkMatrixLedger() {
+    const table = document.getElementById('matrix-table');
+    if (!table || !activeClassContext || !activeSubjectContext) return;
+    table.innerHTML = '';
+
+    const chList = appState.classes[activeClassContext].subjects[activeSubjectContext] || [];
+    
+    let h1 = `<tr><th rowspan="3" style="min-width:45px;">S.N.</th><th rowspan="3" style="min-width:200px;">Full Legal Student Name</th><th rowspan="3" style="min-width:70px;">Roll No</th>`;
+    let h2 = `<tr>`; 
+    let h3 = `<tr>`;
+
+    let activeThemesTotal = 0;
+    let activeChaptersCount = 0;
+
+    chList.forEach(ch => {
+        if (ch.active) {
+            activeThemesTotal += ch.themes.length;
+            activeChaptersCount++;
+        }
+    });
+
+    if (activeThemesTotal > 0) {
+        h1 += `<th colspan="${activeThemesTotal + activeChaptersCount}" style="background:#1e3a8a;">${activeSubjectContext} PERFORMANCE PROFILE EVALUATION MATRIX</th>`;
+        chList.forEach((ch, chIdx) => {
+            if (ch.active) {
+                h2 += `<th colspan="${ch.themes.length}" style="background:#334155;">${ch.chName}</th><th rowspan="2" class="ch-avg-col" style="background:#475569; color:white; font-size:10px;">Ch Avg</th>`;
+                ch.themes.forEach(th => { h3 += `<th style="background:#64748b; font-size:9px; min-width:80px; max-width:120px; white-space:normal;">${th}</th>`; });
+            }
+        });
+    }
+
+    h1 += `</tr>`; h2 += `</tr>`; h3 += `</tr>`;
+    table.innerHTML = `<thead>${h1}${h2}${h3}</thead><tbody id="matrix-body-rows"></tbody>`;
+    
+    renderMatrixRows();
+}
+
+function renderMatrixRows() {
+    const tbody = document.getElementById('matrix-body-rows');
+    if (!tbody) return; tbody.innerHTML = '';
+
+    const targetedStudents = appState.students.filter(s => s.class === activeClassContext);
+    const chList = appState.classes[activeClassContext].subjects[activeSubjectContext] || [];
+
+    targetedStudents.forEach((student, sIdx) => {
+        // Find real index inside absolute tracking array
+        const absoluteIdx = appState.students.findIndex(x => x.id === student.id);
+        
+        const tr = document.createElement('tr');
+        let cells = `<td>${sIdx + 1}</td>
+            <td><input type="text" value="${student.name || ''}" onchange="updateStudentMeta(${absoluteIdx}, 'name', this.value)"></td>
+            <td><input type="text" value="${student.roll || ''}" onchange="updateStudentMeta(${absoluteIdx}, 'roll', this.value)"></td>`;
+
+        chList.forEach((ch, chIdx) => {
+            if (ch.active) {
+                let totalChMarks = 0; let evaluatedThemesCount = 0;
+                ch.themes.forEach((th, thIdx) => {
+                    const scoreKey = `${activeSubjectContext}_C${chIdx}_T${thIdx}`;
+                    const currentVal = student.marks[scoreKey] || '';
+                    if (currentVal !== '') { totalChMarks += parseFloat(currentVal); evaluatedThemesCount++; }
+
+                    cells += `<td><input type="number" class="mark-input" value="${currentVal}" min="1" max="4" oninput="liveValidateRecompute(this, ${absoluteIdx}, '${scoreKey}', ${chIdx})"></td>`;
+                });
+                cells += `<td class="ch-avg-col" id="avg_${absoluteIdx}_C${chIdx}">${evaluatedThemesCount > 0 ? (totalChMarks / evaluatedThemesCount).toFixed(2) : '—'}</td>`;
+            }
+        });
+        
+        tr.innerHTML = cells;
+        tbody.appendChild(tr);
+    });
+}
+
+function updateStudentMeta(absoluteIdx, field, value) {
+    appState.students[absoluteIdx][field] = value;
+}
+
+function liveValidateRecompute(inputEl, absoluteIdx, scoreKey, chIdx) {
+    let val = inputEl.value.trim();
+    if (val === '') { 
+        delete appState.students[absoluteIdx].marks[scoreKey]; 
+    } else { 
+        let parsed = parseFloat(val);
+        if(parsed < 1 || parsed > 4) { inputEl.style.background = "#fee2e2"; return; }
+        inputEl.style.background = "#fff";
+        appState.students[absoluteIdx].marks[scoreKey] = parsed; 
+    }
+    
+    let chTotal = 0; let chCount = 0;
+    const chList = appState.classes[activeClassContext].subjects[activeSubjectContext] || [];
+    chList[chIdx].themes.forEach((_, thIdx) => {
+        let score = parseFloat(appState.students[absoluteIdx].marks[`${activeSubjectContext}_C${chIdx}_T${thIdx}`]);
+        if (!isNaN(score)) { chTotal += score; chCount++; }
+    });
+    const indicator = document.getElementById(`avg_${absoluteIdx}_C${chIdx}`);
+    if (indicator) indicator.textContent = chCount > 0 ? (chTotal / chCount).toFixed(2) : '—';
+}
+
+function addNewStudent() {
+    if (!activeClassContext) return;
+    appState.students.push({ id: Date.now(), name: '', roll: appState.students.filter(s=>s.class === activeClassContext).length + 1, class: activeClassContext, marks: {} });
+    buildMarkMatrixLedger();
+}
+
+function importBulkStudents() {
+    const raw = prompt("Enter student names separated by commas (e.g. Anil Giri, Sita Thapa):");
+    if(!raw) return;
+    raw.split(',').forEach(name => {
+        if(name.trim()) {
+            appState.students.push({ id: Date.now() + Math.random(), name: name.trim(), roll: appState.students.filter(s=>s.class === activeClassContext).length + 1, class: activeClassContext, marks: {} });
+        }
+    });
+    buildMarkMatrixLedger();
+}
+
+async function saveActiveMarksToStorage() {
+    await pushStateToServer();
+    alert("Data successfully synchronized with the cloud backend database router!");
+}
+
+// --- COMPILED MARKSHEET DESK LOGIC ---
+function buildPrintingDashboardControls() {
+    const grid = document.getElementById('print-student-checkbox-grid');
+    if(!grid) return; grid.innerHTML = '';
+
+    const targetedStudents = appState.students.filter(s => s.class === activeClassContext);
+    if(targetedStudents.length === 0) {
+        grid.innerHTML = '<p style="color:#94a3b8; padding:10px;">No student records created for this class index path yet.</p>';
+        return;
+    }
+
+    targetedStudents.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'student-select-item';
+        div.innerHTML = `<label style="display:flex; gap:8px; cursor:pointer; width:100%;">
+            <input type="checkbox" value="${s.id}" checked class="print-student-selector-chk">
+            <span>Roll ${s.roll} - <b>${s.name || 'Unnamed Record'}</b></span>
+        </label>`;
+        grid.appendChild(div);
+    });
+    compileReportSheetsDOM();
+}
+
+function compileReportSheetsDOM() {
+    const mode = document.getElementById('print-layout-mode').value;
+    const printArea = document.getElementById('print-area');
+    if (!printArea) return;
+    printArea.innerHTML = '';
+
+    const checkedIds = Array.from(document.querySelectorAll('.print-student-selector-chk:checked')).map(el => parseFloat(el.value));
+    const targetedStudents = appState.students.filter(s => checkedIds.includes(s.id));
+
+    targetedStudents.forEach(student => {
+        const card = document.createElement('div');
+        card.className = 'report-card';
+        
+        let reportDataHTML = "";
+        if (mode === "CONSOLIDATED") {
+            reportDataHTML = compileConsolidatedHTML(student);
+        } else {
+            reportDataHTML = compileChapterWiseHTML(student);
+        }
+
+        card.innerHTML = `
+            <div>
+                <div class="school-header">
+                    <div class="sch-name">Sirjana English Secondary School</div>
+                    <div class="sch-addr">Bharatpur-9, Chitwan, Nepal</div>
+                    <div class="sch-title">CONTINUOUS ASSESSMENT SYSTEM GRADE PROFILE</div>
+                </div>
+                <div class="student-info-grid">
+                    <div>
+                        Student Name: <b>${student.name || '—'}</b><br>
+                        Class Scope: <b>${student.class}</b>
+                    </div>
+                    <div>
+                        Roll Number: <b>${student.roll || '—'}</b><br>
+                        Evaluation Node Tier: <b>Annual Evaluation Summary</b>
+                    </div>
+                </div>
+                ${reportDataHTML}
+            </div>
+            <div>
+                <div class="signature-section">
+                    <div class="sig-line">Class Teacher Desk</div>
+                    <div class="sig-line">Internal CAS Auditor</div>
+                    <div class="sig-line">School Principal</div>
+                </div>
+            </div>
+        `;
+        printArea.appendChild(card);
+    });
+}
+
+function compileConsolidatedHTML(student) {
+    let trs = "";
+    const subjects = Object.keys(appState.classes[activeClassContext].subjects);
+
+    subjects.forEach(sub => {
+        let totalMarks = 0; let counts = 0;
+        const chList = appState.classes[activeClassContext].subjects[sub] || [];
+        
+        chList.forEach((ch, chIdx) => {
+            if (ch.active) {
+                ch.themes.forEach((_, thIdx) => {
+                    let mark = student.marks[`${sub}_C${chIdx}_T${thIdx}`];
+                    if (mark !== undefined && mark !== '') { totalMarks += parseFloat(mark); counts++; }
+                });
+            }
+        });
+
+        let average = counts > 0 ? (totalMarks / counts).toFixed(2) : '—';
+        let gradeScale = computeDescriptiveIndicator(average);
+
+        trs += `<tr>
+            <td><b>${sub}</b></td>
+            <td style="text-align:center;">${counts}</td>
+            <td style="text-align:center; font-weight:bold; color:#1e3a8a;">${average}</td>
+            <td style="text-align:center; font-weight:bold;">${gradeScale}</td>
+        </tr>`;
+    });
+
+    return `
+        <table class="cas-table">
+            <thead>
+                <tr><th>Course Curriculums Mapped</th><th style="text-align:center;">Objectives Assessed</th><th style="text-align:center;">Aggregated Score Average</th><th style="text-align:center;">Descriptive Grade Scale</th></tr>
+            </thead>
+            <tbody>${trs}</tbody>
+        </table>
+    `;
+}
+
+function compileChapterWiseHTML(student) {
+    let trs = "";
+    const chList = appState.classes[activeClassContext].subjects[activeSubjectContext] || [];
+
+    chList.forEach((ch, chIdx) => {
+        if (!ch.active) return;
+        trs += `<tr class="sub-heading-row"><td colspan="3">📁 ${ch.chName}</td></tr>`;
+        
+        let chTotal = 0; let chCount = 0;
+        ch.themes.forEach((th, thIdx) => {
+            let mark = student.marks[`${activeSubjectContext}_C${chIdx}_T${thIdx}`];
+            let displayMark = '—';
+            if (mark !== undefined && mark !== '') { 
+                displayMark = mark; 
+                chTotal += parseFloat(mark); 
+                chCount++; 
+            }
+            trs += `<tr><td style="padding-left:25px;">${th}</td><td style="text-align:center; font-weight:bold;">${displayMark}</td><td></td></tr>`;
+        });
+        let chAvg = chCount > 0 ? (chTotal / chCount).toFixed(2) : '—';
+        trs += `<tr class="ch-summary-row"><td>Unit Average Performance Node Summary</td><td style="text-align:center; background:#cbd5e1;">${chAvg}</td><td style="text-align:center;">${computeDescriptiveIndicator(chAvg)}</td></tr>`;
+    });
+
+    return `
+        <h4 style="margin-bottom:8px;">Subject Focus View Profile Node: ${activeSubjectContext}</h4>
+        <table class="cas-table">
+            <thead>
+                <tr><th>Unit Objective Matrix Rules</th><th style="text-align:center; width:100px;">Assigned Metric</th><th style="text-align:center; width:120px;">Descriptive Rank</th></tr>
+            </thead>
+            <tbody>${trs}</tbody>
+        </table>
+    `;
+}
+
+function computeDescriptiveIndicator(val) {
+    let num = parseFloat(val);
+    if(isNaN(num)) return "Unevaluated Core Context";
+    if(num >= 3.6) return "A+ Outstanding";
+    if(num >= 3.0) return "A Highly Acceptable";
+    if(num >= 2.4) return "B Sufficient";
+    if(num >= 1.5) return "C Developing Strategy";
+    return "Insufficient Progress Framework";
+}
+
+function executeSystemPrintJob() {
+    compileReportSheetsDOM();
+    window.print();
+}
+
+// --- DOM REGISTRATION BOOTLOADER MAPPING ---
 window.onload = function() {
-    loadSystemStateFromServer();
+    fetchSystemMasterState();
 };
