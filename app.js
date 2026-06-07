@@ -24,7 +24,7 @@ async function runAuthPipeline() {
 
 // --- SECURE ACTION ---
 async function adminAction(endpoint, body) {
-    await fetch(`${API_BASE}${endpoint}`, {
+    await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
