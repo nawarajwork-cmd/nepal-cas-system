@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepal CAS Marksheet System (Grades 1-3)</title>
+    <title>Sirjana Secondary - Advanced multi-Class CAS Cloud Architecture</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -21,720 +21,973 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: var(--bg-main); color: var(--text); padding-bottom: 60px; font-size: 14px; }
 
-        /* Navigation Layouts */
         .navbar { background: var(--secondary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .navbar h1 { font-size: 18px; font-weight: 600; }
+        
         .stepper { display: flex; background: #fff; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .step { flex: 1; padding: 15px 10px; text-align: center; font-weight: 600; color: #94a3b8; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.2s; }
         .step.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0fdf4; }
 
-        /* General Utilities */
         .container { max-width: 1400px; margin: 20px auto; padding: 0 15px; }
         .panel { display: none; }
         .panel.active { display: block; }
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        h3 { color: var(--secondary); margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        h3 { color: var(--secondary); margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Configuration Fields */
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .field { display: flex; flex-direction: column; gap: 5px; }
-        .field label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+        .field label { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; }
+        
         input, select, textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--secondary); width: 100%; outline: none; }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,0.1); }
 
-        /* Access Mode Badges */
-        .role-indicator { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px dashed var(--border); flex-wrap: wrap; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        .badge-admin { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
-        .badge-teacher { background: #e0f2fe; color: var(--primary); border: 1px solid #bae6fd; }
-
-        /* Curriculum UI */
-        .subject-box { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
-        .subject-hdr { background: #f1f5f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 1px solid var(--border); }
-        .chapter-box { background: #fafafa; margin: 10px; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0; border-left: 4px solid var(--primary); }
-        .chapter-hdr { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .theme-row { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; padding-left: 20px; }
-
-        /* Controls */
         .btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s; user-select: none; }
         .btn-p { background: var(--primary); color: white; border: none; }
         .btn-p:hover { background: var(--primary-hover); }
         .btn-s { background: white; color: var(--secondary); }
         .btn-s:hover { background: #f8fafc; }
         .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fca5a5; }
-        .btn-danger:hover { background: #fecaca; }
         .btn-success { background: #f0fdf4; color: var(--success); border-color: #bbf7d0; }
-        .btn-success:hover { background: #dcfce7; }
+        .btn-warning { background: #ffedd5; color: var(--warning); border-color: #fed7aa; }
         .sm-btn { padding: 4px 8px; font-size: 11px; border-radius: 4px; }
-        .chk-container { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .chk-container input { width: auto; cursor: pointer; }
 
-        /* Spreadsheet Entry Layout Matrix */
+        /* Tables */
         .sheet-wrapper { overflow-x: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 6px; margin-top: 10px; }
-        table.sheet { border-collapse: collapse; width: 100%; font-size: 12px; background: white; text-align: left; }
-        table.sheet th, table.sheet td { padding: 6px 10px; border: 1px solid var(--border); }
-        table.sheet th { background: #1e293b; color: white; text-align: center; position: sticky; top: 0; z-index: 10; font-size: 11px; white-space: nowrap; }
+        table.sheet { border-collapse: collapse; width: 100%; font-size: 12px; background: white; }
+        table.sheet th, table.sheet td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+        table.sheet th { background: #1e293b; color: white; text-align: center; font-size: 11px; position: sticky; top: 0; }
         table.sheet tr:nth-child(even) td { background: #f8fafc; }
+        
+        .assignment-tag { display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); margin: 2px; }
+
+        /* Modals */
+        #login-modal, .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center; }
+        .modal-overlay { background: rgba(15,23,42,0.6); display: none; }
+        #main-application-content { display: none; }
+
+        /* Assessment matrix input custom styles */
         table.sheet input.mark-input { width: 50px; text-align: center; font-weight: bold; padding: 4px; border-radius: 4px; }
-        table.sheet input.mark-input.err { border-color: var(--danger); background: #fee2e2; }
         .ch-avg-col { background: #f1f5f9 !important; font-weight: bold; text-align: center; color: var(--primary); min-width: 60px; }
 
-        /* Selection Controls */
-        .print-selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
-        .student-select-item, .chapter-select-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8fafc; }
-        .student-select-item input, .chapter-select-item input { width: auto; cursor: pointer; }
-
-        /* BATCH PRINT DISPLAY WORKSPACE */
-        .print-toolbar { background: #fff; border-bottom: 1px solid var(--border); padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-        #print-area { background: #525659; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 35px; min-height: 100vh; }
+        /* Print Layouts */
+        #print-area { display: none; background: #525659; padding: 40px 0; flex-direction: column; align-items: center; gap: 35px; }
+        .report-card { background: white; width: 210mm; min-height: 297mm; padding: 20mm 15mm; color: black; box-sizing: border-box; font-family: Arial, sans-serif; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
         
-        /* STRICT A4 PORTRAIT FORMATTING BOUNDARIES */
-        .report-card { 
-            background: white; 
-            width: 210mm; 
-            min-height: 297mm; 
-            padding: 15mm 15mm; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.3); 
-            color: black; 
-            box-sizing: border-box; 
-            position: relative; 
-            font-family: Arial, Helvetica, sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-        }
-        
-        .school-header { text-align: center; margin-bottom: 15px; }
-        .school-header .sch-name { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #000; letter-spacing: 0.5px; }
-        .school-header .sch-addr { font-size: 13px; font-weight: bold; margin-top: 2px; }
-        .school-header .sch-title { font-size: 14px; font-weight: bold; text-decoration: underline; margin-top: 12px; letter-spacing: 1px; color: #1e3a8a; }
-        
-        .student-info-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; border-bottom: 2px solid #000; padding-bottom: 8px; }
-        
-        .cas-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 15px; }
-        .cas-table th, .cas-table td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; }
-        .cas-table th { background: #f2f2f2; font-weight: bold; text-align: left; }
-        .cas-table th.center, .cas-table td.center { text-align: center; }
-        .sub-heading-row { background: #dfdfdf; font-weight: bold; font-size: 12px; letter-spacing: 0.5px; }
-        .ch-summary-row { background: #f4f4f4; font-weight: bold; }
-        .th-indent { padding-left: 20px !important; color: #444; }
-
-        .summary-gpa-box { margin-top: 10px; width: 100%; border-collapse: collapse; }
-        .summary-gpa-box th, .summary-gpa-box td { border: 1px solid #000; padding: 6px 8px; font-size: 11px; }
-        .summary-gpa-box th { background: #e6e6e6; font-weight: bold; text-align: left; }
-        .summary-gpa-box th.center, .summary-gpa-box td.center { text-align: center; }
-        
-        .scale-table { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 15px; }
-        .scale-table th, .scale-table td { border: 1px solid #000; padding: 4px 5px; text-align: center; }
-        .scale-table th { background: #f2f2f2; font-weight: bold; }
-
-        .signature-section { display: flex; justify-content: space-between; margin-top: 35px; font-size: 11px; padding: 0 10px; }
-        .sig-line { border-top: 1px solid #000; width: 160px; text-align: center; padding-top: 5px; font-weight: bold; }
-
         @media print {
-            .navbar, .stepper, .container, .print-toolbar, .panel, .panel.active { display: none !important; }
-            body { background: transparent !important; padding: 0 !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            @page { size: A4 portrait; margin: 0; }
-            #print-area { display: block !important; background: transparent !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
-            .report-card { box-shadow: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; page-break-after: always !important; padding: 20mm 15mm !important; }
-            .report-card:last-child { page-break-after: avoid !important; }
+            .navbar, .stepper, .container, #login-modal, .modal-overlay { display: none !important; }
+            body { background: transparent !important; padding: 0 !important; margin: 0 !important; }
+            #main-application-content { display: block !important; }
+            #print-area { display: flex !important; background: transparent !important; padding: 0 !important; }
+            .report-card { box-shadow: none !important; page-break-after: always !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <h1>Nepal CAS Evaluation & Records Management System</h1>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <div style="display: flex; flex-direction: column; gap: 2px;">
-            <label style="font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">System Privileges Mode</label>
-            <select id="sys-role-selector" onchange="handleRoleSwitchEngine()" style="background: #1e293b; color: white; border-color: #475569; padding: 5px 10px; font-weight: bold;">
-                <option value="ADMIN">🛡️ System Administrator Mode</option>
-                <option value="TEACHER">👨‍🏫 Subject Teacher Mode</option>
-            </select>
+<div id="login-modal">
+    <div style="background:#fff; padding:35px; border-radius:12px; width:100%; max-width:400px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.55);">
+        <h2 style="color:#0f172a; margin-bottom:5px; font-size:22px; text-align:center;">Sirjana Secondary School</h2>
+        <p style="color:#64748b; font-size:12px; text-align:center; margin-bottom:20px;">CAS Framework Portal Platform Node</p>
+        
+        <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">USER ID / USERNAME</label>
+            <input type="text" id="user-input" placeholder="e.g. admin, teacher.1" style="padding:10px;">
         </div>
-        <button class="btn btn-danger sm-btn" onclick="clearAllData()">Reset System</button>
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px; color:#475569;">PASSWORD</label>
+            <input type="password" id="pass-input" placeholder="••••" style="padding:10px;">
+        </div>
+        
+        <button onclick="runAuthPipeline()" style="width:100%; padding:12px; background:#1e3a8a; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Authenticate Node</button>
+        <p id="auth-error" style="color:#dc2626; font-size:12px; text-align:center; margin-top:12px; display:none; font-weight:600;"></p>
     </div>
 </div>
 
-<div class="stepper">
-    <div class="step active" id="st-1" onclick="goStep(1)">1. School & Subject Structure Setup</div>
-    <div class="step" id="st-2" onclick="goStep(2)">2. Secure Student Mark Entry Matrix</div>
-    <div class="step" id="st-3" onclick="goStep(3)">3. Generate & Print CAS Sheets</div>
+<div class="modal-overlay" id="edit-teacher-modal">
+    <div style="background:#fff; padding:25px; border-radius:8px; width:100%; max-width:450px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom:15px; border:none;">✏️ Edit Faculty Account Profile</h3>
+        <input type="hidden" id="edit-teacher-index-id">
+        <div class="field">
+            <label>Teacher Full Name</label>
+            <input type="text" id="edit-teacher-name">
+        </div>
+        <div class="field">
+            <label>System Login ID / Username</label>
+            <input type="text" id="edit-teacher-login-id" style="font-weight:bold; color:var(--danger);">
+        </div>
+        <div class="field">
+            <label>Security Password Key</label>
+            <input type="text" id="edit-teacher-password">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button class="btn btn-s" onclick="closeEditTeacherModal()">Cancel</button>
+            <button class="btn btn-p" onclick="adminSubmitTeacherUpdate()">Save Database Changes</button>
+        </div>
+    </div>
 </div>
 
-<div class="container">
-    
-    <div class="panel active" id="panel-setup">
-        <div class="card" id="admin-profile-card">
-            <h3>Administrative School Profile Data <span class="badge badge-admin">Admin Only</span></h3>
-            <div class="grid-3">
-                <div class="field"><label>School Name</label><input id="sch-name" value="SIRJANA ENGLISH SECONDARY SCHOOL" oninput="saveProfile()"/></div>
-                <div class="field"><label>Address Location</label><input id="sch-addr" value="BHARATPUR-9, CHITWAN, NEPAL" oninput="saveProfile()"/></div>
-                <div class="field"><label>EMIS Code</label><input id="sch-emis" value="350050001" oninput="saveProfile()"/></div>
-                <div class="field">
-                    <label>Class / Grade</label>
-                    <select id="sch-grade" onchange="changeGrade()">
-                        <option value="1">Grade I</option>
-                        <option value="2">Grade II</option>
-                        <option value="3">Grade III</option>
-                    </select>
-                </div>
-                <div class="field"><label>Academic Year</label><input id="sch-year" value="2083 B.S." oninput="saveProfile()"/></div>
-                <div class="field">
-                    <label>Evaluation Term</label>
-                    <select id="sch-term" onchange="saveProfile()">
-                        <option>First Terminal Evaluation</option>
-                        <option>Second Terminal Evaluation</option>
-                        <option>Third Terminal Evaluation</option>
-                        <option selected>Annual Evaluation Summary</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="card" id="admin-teacher-management-card">
-            <h3>👥 Teacher Registration Desk <span class="badge badge-admin">Admin Only</span></h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="new-teacher-name-input" placeholder="Enter Full Teacher Name (e.g., Shanti Thapa)" style="flex:1;">
-                <button class="btn btn-p" onclick="addCustomTeacherToServer()">+ Register Teacher</button>
-            </div>
-            <div id="teachers-list-registry" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:10px;"></div>
-        </div>
-
-        <div class="card">
-            <h3>
-                <span>Curriculum Structure Mapping (Subjects → Chapters → Themes)</span>
-                <button id="admin-add-sub-btn" class="btn btn-p sm-btn" onclick="addCustomSubject()">+ Add New Custom Subject</button>
-            </h3>
-            
-            <div class="role-indicator">
-                <span id="setup-role-badge"></span>
-                
-                <div id="admin-setup-filter-wrapper" style="display:flex; align-items:center; gap:8px; margin-left:auto;">
-                    <label style="font-weight:bold; font-size:12px; color:var(--danger);">Admin Filter Area:</label>
-                    <select id="setup-admin-subject-filter" onchange="onAdminFilterChange()" style="width:180px; padding:5px; font-weight:bold;"></select>
-                </div>
-                
-                <div id="teacher-setup-filter-wrapper" style="display:flex; align-items:center; gap:8px; margin-left:auto;">
-                    <label style="font-weight:bold; font-size:12px; color:var(--primary);">Teacher Active Course:</label>
-                    <select id="setup-teacher-subject-filter" onchange="onTeacherFilterChange()" style="width:180px; padding:5px; font-weight:bold; border-color:var(--primary);"></select>
-                </div>
-            </div>
-
-            <p style="font-size: 12px; color:#64748b; margin-bottom: 15px;">
-                💡 Uncheck chapters that aren't included in this terminal evaluation. Excluded units won't modify computed grade point averages. Subject teachers can modify text titles and active options for their respective course choices independently.
-            </p>
-            <div id="subject-mapping-container"></div>
-        </div>
-        
-        <div class="btn-row" style="text-align: right;">
-            <button class="btn btn-p" onclick="goStep(2)">Proceed to Score Entry Matrix →</button>
+<div id="main-application-content">
+    <div class="navbar">
+        <h1>Sirjana Secondary School — Cloud CAS Database Engine</h1>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="user-display-profile" style="color: white; font-weight: bold; background: #1e293b; padding: 5px 12px; border-radius: 4px; border: 1px solid #475569;">Checking...</span>
+            <button class="btn btn-danger sm-btn" onclick="terminateSession()">Logout</button>
         </div>
     </div>
 
-    <div class="panel" id="panel-marks">
-        <div class="card">
-            <h3>Student Roster Ledger Matrix</h3>
-            
-            <div class="role-indicator">
-                <span id="matrix-role-badge"></span>
-                <div style="display: flex; align-items: center; gap:8px; margin-left:auto;">
-                    <label style="font-weight:bold; font-size:12px; color:#475569;">Active Working Filter Status:</label>
-                    <span id="matrix-active-filter-label" style="font-weight:bold; color:var(--primary); background:white; padding:4px 8px; border:1px solid var(--border); border-radius:4px;"></span>
-                </div>
-            </div>
-
-            <div style="display: flex; gap:10px; margin-bottom:15px; flex-wrap: wrap; align-items:center;">
-                <button id="btn-matrix-add-student" class="btn btn-p" onclick="addNewStudent()">+ Add Single Student Row</button>
-                <button id="btn-matrix-bulk-student" class="btn btn-s" onclick="importBulkStudents()">⚡ Bulk Populate Class Names</button>
-                <button class="btn btn-success" onclick="saveActiveMarksToStorage()">💾 Save Working Ledger Changes</button>
-                <button class="btn btn-s" style="background: #f0fdf4; color:#16a34a; border-color:#bbf7d0;" onclick="exportLedgerToExcel()">📥 Export Matrix Layout to Excel (.csv)</button>
-            </div>
-            
-            <p style="font-size: 11px; color:#64748b; margin-bottom: 10px;">⚠️ Entry Parameters: <b>1 (Needs Support)</b> to <b>4 (Outstanding)</b>. Leaving fields blank saves records as unevaluated modules.</p>
-            
-            <div class="sheet-wrapper">
-                <table class="sheet" id="matrix-table"></table>
-            </div>
-        </div>
-        
-        <div class="btn-row" style="display: flex; justify-content: space-between;">
-            <button class="btn btn-s" onclick="goStep(1)">← Back to System Configurations</button>
-            <button class="btn btn-p" onclick="goStep(3)">Compile and Render Official Grade Sheets →</button>
-        </div>
+    <div class="stepper">
+        <div class="step active" id="st-1" onclick="goStep(1)">1. Control Panel Center</div>
+        <div class="step" id="st-2" onclick="goStep(2)">2. CAS Curriculum Setup</div>
+        <div class="step" id="st-3" onclick="goStep(3)">3. Data Entry Mark Matrix</div>
+        <div class="step" id="st-4" onclick="goStep(4)">4. Print Engine Layout Desk</div>
     </div>
 
-    <div class="panel" id="panel-print">
-        <div class="print-toolbar">
-            <div class="card" style="margin-bottom:0; width:100%;">
-                <h3 style="border:none; margin-bottom:10px;">🖨️ Bulk Printing Configuration Desk</h3>
-                
-                <div class="grid-3" style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <div class="field">
-                        <label style="color:var(--primary); font-weight:bold;">1. Select Marksheet Layout Style</label>
-                        <select id="print-layout-mode" onchange="handlePrintLayoutStyleSwitch()">
-                            <option value="CONSOLIDATED">📊 Consolidated Subject-Wise Summary (All Subjects)</option>
-                            <option value="CHAPTER_WISE">📂 Granular Course Chapter-Wise Ledger (Single Subject)</option>
-                        </select>
+    <div class="container">
+        
+        <div class="panel active" id="panel-admin">
+            <div id="admin-only-dashboard-wrapper">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🏫 Add System Classes & Course Subjects</h3>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <input type="text" id="new-class-input" placeholder="e.g., Grade 1, Grade 2">
+                            <button class="btn btn-p" onclick="adminCreateClass()">Add Class</button>
+                        </div>
+                        <hr style="border:0; border-bottom:1px solid var(--border); margin:15px 0;">
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Target Class Scope</label>
+                                <select id="subject-target-class-select"></select>
+                            </div>
+                            <div class="field">
+                                <label>Subject Title Name</label>
+                                <input type="text" id="new-subject-input" placeholder="e.g., NEPALI, ENGLISH">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" style="width:100%; justify-content:center;" onclick="adminCreateSubject()">Save Subject to Selected Class</button>
                     </div>
-                    <div class="field" id="print-subject-filter-field" style="display:none;">
-                        <label style="color:var(--warning); font-weight:bold;">2. Target Subject Focus</label>
-                        <select id="print-target-subject" onchange="handlePrintSubjectSelectionChange()"></select>
-                    </div>
-                    <div class="field" style="justify-content: flex-end;">
-                        <button class="btn btn-p" style="width:100%; justify-content:center; padding:10px;" onclick="executeSystemPrintJob()">⚡ Execute A4 Batch Print Job</button>
+
+                    <div class="card">
+                        <h3>👤 Register Faculty Teachers</h3>
+                        <div class="field">
+                            <label>Teacher Full Name</label>
+                            <input type="text" id="new-teacher-name" placeholder="e.g., Ram Bahadur">
+                        </div>
+                        <button class="btn btn-p" style="width:100%; justify-content:center;" onclick="adminCreateTeacherAccount()">Register Teacher Row</button>
+                        <p style="font-size:11px; color:#64748b; margin-top:8px;">💡 Auto-assigned credentials: ID: <code>teacher.(S.N.)</code> | Password: <code>9876</code></p>
                     </div>
                 </div>
 
-                <div id="print-chapter-optional-box" style="display:none; margin-bottom:15px; background:#fffbf7; border:1px solid #ffe4cc; padding:12px; border-radius:6px;">
-                    <div style="display:flex; gap:10px; margin-bottom:8px; align-items:center;">
-                        <label style="font-size:11px; font-weight:bold; text-transform:uppercase; color:var(--warning);">
-                            Optional Chapter Visibility Filters (Uncheck to hide specific units from final sheets):
-                        </label>
-                        <div style="margin-left:auto; display:flex; gap:8px;">
-                            <button class="btn btn-s sm-btn" onclick="toggleAllChapterSelections(true)">✓ Select All Chapters</button>
-                            <button class="btn btn-danger sm-btn" onclick="toggleAllChapterSelections(false)">✕ Clear All Chapters</button>
+                <div class="card">
+                    <h3>🔗 Assign Teachers to Classes & Course Subjects</h3>
+                    <div class="grid-3">
+                        <div class="field">
+                            <label>1. Select Faculty Member</label>
+                            <select id="assign-teacher-select"></select>
+                        </div>
+                        <div class="field">
+                            <label>2. Select Active Target Class</label>
+                            <select id="assign-class-select" onchange="populateAssignSubjectDropdown()"></select>
+                        </div>
+                        <div class="field">
+                            <label>3. Select Target Course Subject</label>
+                            <select id="assign-subject-select"></select>
                         </div>
                     </div>
-                    <div class="print-selection-grid" id="chapter-print-checkboxes" style="max-height:100px;"></div>
+                    <button class="btn btn-p" style="margin-top:5px;" onclick="adminAssignTeacherCourseRoute()">Link Assignment Mapping Node</button>
                 </div>
 
-                <div style="display:flex; gap:10px; margin-bottom:8px; align-items:center;">
-                    <label style="font-size:11px; font-weight:bold; text-transform:uppercase; color:#64748b;">
-                        Filter Target Students to Include (<span id="print-stats">0</span> Selected):
-                    </label>
-                    <div style="margin-left:auto; display:flex; gap:8px;">
-                        <button class="btn btn-s sm-btn" onclick="toggleAllStudentSelections(true)">✓ Select All</button>
-                        <button class="btn btn-danger sm-btn" onclick="toggleAllStudentSelections(false)">✕ Clear All</button>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📋 School Configuration Summary Directory</h3>
+                        <div id="class-directory-render-box"></div>
+                    </div>
+                    <div class="card">
+                        <h3>🔑 Registered Teacher Access Roster Ledger</h3>
+                        <div class="sheet-wrapper">
+                            <table class="sheet">
+                                <thead>
+                                    <tr><th>Teacher Name</th><th>System Login ID</th><th>Password Key</th><th>Assigned Scopes</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="teacher-directory-tbody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="print-selection-grid" id="student-print-checkboxes"></div>
+            </div>
+
+            <div id="teacher-welcome-dashboard-wrapper" style="display:none;">
+                <div class="card" style="text-align:center; padding:40px;">
+                    <h2 style="color:var(--primary); margin-bottom:10px;">Welcome Back, <span id="teacher-welcome-name"></span>!</h2>
+                    <p style="color:#475569; margin-bottom:20px;">Your specialized academic teacher assignment profiles have been loaded securely from the server.</p>
+                    <button class="btn btn-p" onclick="goStep(2)">Proceed directly to Assigned Curriculum Units Setup →</button>
+                </div>
             </div>
         </div>
+
+        <div class="panel" id="panel-setup">
+            <div class="card">
+                <h3>🛠️ Curriculum Structure Management (Chapters & Assessment Themes)</h3>
+                <div class="grid-2" style="background:#f1f5f9; padding:15px; border-radius:6px; margin-bottom:15px;">
+                    <div class="field">
+                        <label>Active Working Class Context</label>
+                        <select id="global-class-selector" onchange="handleGlobalClassChange()"></select>
+                    </div>
+                    <div class="field">
+                        <label>Active Working Subject Focus</label>
+                        <select id="global-subject-selector" onchange="renderCurriculumStructureSetup()"></select>
+                    </div>
+                </div>
+                <div id="subject-mapping-container"></div>
+            </div>
+            <button class="btn btn-p" style="float:right;" onclick="goStep(3)">Proceed to Student Ledger Matrix →</button>
+        </div>
+
+        <div class="panel" id="panel-marks">
+            <div class="card">
+                <h3>📊 Student Performance Evaluation Record Matrix</h3>
+                <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-p" id="admin-add-student-row-btn" onclick="addNewStudent()">+ Append Single Student Row</button>
+                    <button class="btn btn-s" id="admin-bulk-student-btn" onclick="importBulkStudents()">⚡ Bulk Populate Names</button>
+                    <button class="btn btn-success" onclick="saveActiveMarksToStorage()">💾 Synchronize Matrix Changes</button>
+                </div>
+                <div class="sheet-wrapper">
+                    <table class="sheet" id="matrix-table"></table>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-print">
+            <div class="card">
+                <h3>🖨️ Grade Sheet Compilation Center Desk</h3>
+                <div class="grid-3" style="background:#f1f5f9; padding:15px; border-radius:6px; margin-bottom:15px;">
+                    <div class="field">
+                        <label>Target Marksheet Report Style</label>
+                        <select id="print-layout-mode" onchange="compileReportSheetsDOM()">
+                            <option value="CONSOLIDATED">📊 Consolidated Subject Summary Profile Card</option>
+                            <option value="CHAPTER_WISE">📂 Comprehensive Theme Progress Ledger Profile</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <button class="btn btn-p" style="margin-top:20px; height:38px; justify-content:center;" onclick="executeSystemPrintJob()">⚡ Trigger A4 Print Job Execution</button>
+                    </div>
+                </div>
+                <div id="print-student-checkbox-grid" class="grid-3" style="border:1px solid var(--border); padding:10px; max-height:200px; overflow-y:auto; background:#fff; border-radius:6px;"></div>
+            </div>
+        </div>
+
     </div>
+    <div id="print-area"></div>
 </div>
 
-<div id="print-area"></div>
-
 <script>
-// --- BACKEND ENDPOINT CONSTANT ---
+// --- CORE CONFIGURATION & CONSTANTS ---
 const BACKEND_API = "https://cas-backend-s9ba.onrender.com/api";
 
-const DEFAULT_CURRICULUM = {
-    'NEPALI': [
-        { chName: 'Chapter 1 – वर्णमाला र उच्चारण', active: true, themes: ['स्वर वर्ण र मात्रा पहिचान', 'व्यञ्जन वर्ण उच्चारण र लेखन', 'समान ध्वनि भएका शब्द वर्गीकरण'] },
-        { chName: 'Chapter 2 – शब्द भण्डार र प्रयोग', active: true, themes: ['घरायसी र सामाजिक शब्द प्रयोग', 'विपरीतार्थक शब्द पहिचान', 'सरल वाक्य निर्माण क्षमता'] }
-    ],
-    'ENGLISH': [
-        { chName: 'Chapter 1 – Phonics and Alphabetics', active: true, themes: ['Letter-sound correspondences', 'Decoding simple CVC words'] }
-    ]
+// Main Reactive State Matrix
+let db = {
+    classes: {},       // Format: { "Grade 1": { subjects: { "NEPALI": [ chapters ] } } }
+    teachers: [],      // Format: [ { id: "teacher.1", name: "...", pass: "...", assignments: [] } ]
+    students: {}       // Format: { "Grade 1": [ { id: 1, name: "...", roll: 1, marks: {} } ] }
 };
 
-let systemConfig = {
-    profile: { name: "SIRJANA ENGLISH SECONDARY SCHOOL", addr: "BHARATPUR-9, CHITWAN, NEPAL", emis: "350050001", grade: "1", year: "2083 B.S.", term: "Annual Evaluation Summary" },
-    curriculum: {}, 
-    students: [],
-    teachers: []    
-};
+let currentUser = null; // Stores currently authenticated entity profile data
 
-let currentRole = "ADMIN"; 
-let adminSelectedSubject = "ALL";    
-let teacherSelectedSubject = "NEPALI"; 
-let selectedStudentIdsForPrint = []; 
-let targetPrintSubjectSelected = "NEPALI";
-let disabledPrintChaptersList = []; 
-
-// --- DYNAMIC NETWORK REFRESH CONTEXT LAYER ---
-async function loadSystemState() {
+// --- SERVER RETRIEVAL INTERNALS REFRESH CYCLE ---
+async function loadSystemStateFromServer() {
     try {
         const response = await fetch(`${BACKEND_API}/admin/database-state`);
         if (response.ok) {
-            const data = await response.json();
-            if (data && data.curriculum && Object.keys(data.curriculum).length > 0) {
-                systemConfig = data;
-            } else {
-                systemConfig.curriculum = JSON.parse(JSON.stringify(DEFAULT_CURRICULUM));
+            const serverData = await response.json();
+            if (serverData) {
+                db.classes = serverData.classes || {};
+                db.teachers = serverData.teachers || [];
+                db.students = serverData.students || {};
             }
         }
     } catch (err) {
-        console.warn("Backend unavailable, initializing default configuration.", err);
-        systemConfig.curriculum = JSON.parse(JSON.stringify(DEFAULT_CURRICULUM));
+        console.error("Cloud engine connection offline. Running local layer fallback logic.", err);
     }
-    
-    // Bind UI elements
-    document.getElementById('sch-name').value = systemConfig.profile.name || '';
-    document.getElementById('sch-addr').value = systemConfig.profile.addr || '';
-    document.getElementById('sch-emis').value = systemConfig.profile.emis || '';
-    document.getElementById('sch-grade').value = systemConfig.profile.grade || '1';
-    document.getElementById('sch-year').value = systemConfig.profile.year || '';
-    document.getElementById('sch-term').value = systemConfig.profile.term || '';
 
-    selectedStudentIdsForPrint = systemConfig.students.map(s => s.id);
-
-    initializeFiltersAndSelectors();
-    applyPrivilegeConstraints();
-    renderTeachersRegistryUI();
+    // Refresh every dependent configuration element dynamically on screen
+    refreshControlPanelDropdownsAndViews();
+    refreshCurriculumDropdownSelectors();
+    renderCurriculumStructureSetup();
+    buildMarkMatrixLedger();
+    buildPrintingDashboardControls();
 }
 
-async function syncStateToBackend() {
+async function syncStateToBackendCloud() {
     try {
         await fetch(`${BACKEND_API}/admin/database-state`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(systemConfig)
+            body: JSON.stringify(db)
         });
     } catch (e) {
-        console.error("Error synchronizing state:", e);
+        console.error("Failed to sync structural change to remote server:", e);
     }
 }
 
-// --- NEW CRITICAL ACTIONS: CREATE CLASS / SUBJECTS / TEACHERS VIA NETWORK ---
-async function changeGrade() {
-    systemConfig.profile.grade = document.getElementById('sch-grade').value;
-    try {
-        await fetch(`${BACKEND_API}/admin/classes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ className: `Grade ${systemConfig.profile.grade}` })
-        });
-        await loadSystemState(); // Immediate internal refresh callback
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-async function addCustomSubject() { 
-    if(currentRole !== "ADMIN") return;
-    const name = prompt("Enter New Subject Heading:"); 
-    if(name) { 
-        const clean = name.toUpperCase().replace(/[^A-Z_]/g, ''); 
-        try {
-            await fetch(`${BACKEND_API}/admin/subjects`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ className: `Grade ${systemConfig.profile.grade}`, subjectName: clean })
-            });
-            await loadSystemState(); // Immediate internal refresh callback
-        } catch (e) {
-            console.error(e);
-        }
-    } 
-}
-
-async function addCustomTeacherToServer() {
-    const inputEl = document.getElementById('new-teacher-name-input');
-    const name = inputEl.value.trim();
-    if(!name) return;
-
-    try {
-        const res = await fetch(`${BACKEND_API}/admin/teachers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name })
-        });
-        if(res.ok) {
-            inputEl.value = '';
-            await loadSystemState(); // Immediate internal refresh callback
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-async function deleteTeacherFromServer(id) {
-    if(!confirm("Remove this teacher account layout permanently?")) return;
-    try {
-        const res = await fetch(`${BACKEND_API}/admin/teachers/${id}`, { method: 'DELETE' });
-        if(res.ok) await loadSystemState();
-    } catch (e) { console.error(e); }
-}
-
-async function assignSubjectToTeacher(teacherId, selectEl) {
-    const val = selectEl.value;
-    if(!val) return;
-    try {
-        await fetch(`${BACKEND_API}/admin/assignments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacherId, className: `Grade ${systemConfig.profile.grade}`, subjectName: val })
-        });
-        await loadSystemState();
-    } catch (e) { console.error(e); }
-}
-
-// --- RENDERING TEACHERS WORKSPACE ROUTINE ---
-function renderTeachersRegistryUI() {
-    const container = document.getElementById('teachers-list-registry');
-    if(!container) return;
-    container.innerHTML = '';
-
-    if(!systemConfig.teachers || systemConfig.teachers.length === 0) {
-        container.innerHTML = `<p style="color:#64748b; font-size:12px; padding:10px;">No teachers registered yet.</p>`;
-        return;
-    }
-
-    const subjects = Object.keys(systemConfig.curriculum);
-
-    systemConfig.teachers.forEach(t => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.style.background = '#f8fafc';
-        div.style.padding = '12px';
-        div.style.marginBottom = '0';
-        
-        let assignmentBadges = (t.assignments || []).map(a => 
-            `<span class="badge badge-teacher" style="margin-right:4px; display:inline-block; margin-top:4px;">${a.class} - ${a.subject}</span>`
-        ).join('');
-
-        let subjectOptions = `<option value="">+ Bind Course Maps</option>`;
-        subjects.forEach(s => { subjectOptions += `<option value="${s}">${s}</option>`; });
-
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <strong>👤 ${t.name}</strong>
-                <button class="btn btn-danger sm-btn" onclick="deleteTeacherFromServer('${t.id}')">✕</button>
-            </div>
-            <div style="font-size:11px; color:#475569; margin-bottom:6px;">
-                🔑 ID: <code style="background:#e2e8f0; padding:2px 4px; border-radius:3px;">${t.id}</code> | Pass: <code>${t.pass}</code>
-            </div>
-            <div style="margin-bottom:8px;">${assignmentBadges || '<span style="color:#94a3b8; font-size:11px;">No mapped subjects</span>'}</div>
-            <select onchange="assignSubjectToTeacher('${t.id}', this)" style="padding:4px; font-size:11px;">${subjectOptions}</select>
-        `;
-        container.appendChild(div);
+// --- DYNAMIC CONTROL PANEL RE-RENDERING ENGINE ---
+function refreshControlPanelDropdownsAndViews() {
+    const classList = Object.keys(db.classes);
+    
+    // 1. Populate Subject Target Class Select
+    const targetClassSel = document.getElementById('subject-target-class-select');
+    targetClassSel.innerHTML = "";
+    classList.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        targetClassSel.appendChild(opt);
     });
-}
 
-// --- PRE-EXISTING CONFIGURATION MANAGEMENT FLOWS ---
-function saveProfile() {
-    if(currentRole !== "ADMIN") return;
-    systemConfig.profile.name = document.getElementById('sch-name').value;
-    systemConfig.profile.addr = document.getElementById('sch-addr').value;
-    systemConfig.profile.emis = document.getElementById('sch-emis').value;
-    systemConfig.profile.grade = document.getElementById('sch-grade').value;
-    systemConfig.profile.year = document.getElementById('sch-year').value;
-    systemConfig.profile.term = document.getElementById('sch-term').value;
-    syncStateToBackend();
-}
-
-function initializeFiltersAndSelectors() {
-    const subjects = Object.keys(systemConfig.curriculum || {});
-    const adminFilterSelect = document.getElementById('setup-admin-subject-filter');
-    const teacherFilterSelect = document.getElementById('setup-teacher-subject-filter');
-    const printSubjectSelect = document.getElementById('print-target-subject');
-    
-    let adminOptions = `<option value="ALL">🌎 [Show All Subjects Model]</option>`;
-    let teacherOptions = ``; let printOptions = ``;
-    
-    subjects.forEach(sub => {
-        adminOptions += `<option value="${sub}">${sub}</option>`;
-        teacherOptions += `<option value="${sub}">${sub}</option>`;
-        printOptions += `<option value="${sub}">${sub}</option>`;
+    // 2. Populate Teacher Assignment Link Class Dropdown
+    const assignClassSel = document.getElementById('assign-class-select');
+    const previousAssignClassVal = assignClassSel.value;
+    assignClassSel.innerHTML = "";
+    classList.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        assignClassSel.appendChild(opt);
     });
-    
-    if(adminFilterSelect) adminFilterSelect.innerHTML = adminOptions;
-    if(teacherFilterSelect) teacherFilterSelect.innerHTML = teacherOptions;
-    if(printSubjectSelect) printSubjectSelect.innerHTML = printOptions;
-}
+    if (previousAssignClassVal && classList.includes(previousAssignClassVal)) {
+        assignClassSel.value = previousAssignClassVal;
+    }
+    populateAssignSubjectDropdown();
 
-function onAdminFilterChange() { adminSelectedSubject = document.getElementById('setup-admin-subject-filter').value; renderCurriculumStructureSetup(); }
-function onTeacherFilterChange() { teacherSelectedSubject = document.getElementById('setup-teacher-subject-filter').value; renderCurriculumStructureSetup(); }
-function handleRoleSwitchEngine() { currentRole = document.getElementById('sys-role-selector').value; applyPrivilegeConstraints(); }
+    // 3. Populate Assign Teacher Dropdown Selection list
+    const assignTeacherSel = document.getElementById('assign-teacher-select');
+    assignTeacherSel.innerHTML = "";
+    db.teachers.forEach(t => {
+        let opt = document.createElement('option');
+        opt.value = t.id; opt.textContent = t.name;
+        assignTeacherSel.appendChild(opt);
+    });
 
-function applyPrivilegeConstraints() {
-    const adminProfileCard = document.getElementById('admin-profile-card');
-    const adminTeacherCard = document.getElementById('admin-teacher-management-card');
-    const adminAddSubBtn = document.getElementById('admin-add-sub-btn');
-    const adminFilterWrapper = document.getElementById('admin-setup-filter-wrapper');
-    const teacherFilterWrapper = document.getElementById('teacher-setup-filter-wrapper');
-    const btnAddStudent = document.getElementById('btn-matrix-add-student');
-    const btnBulkStudent = document.getElementById('btn-matrix-bulk-student');
-    const setupBadge = document.getElementById('setup-role-badge');
-    const matrixBadge = document.getElementById('matrix-role-badge');
-    const matrixFilterLabel = document.getElementById('matrix-active-filter-label');
-
-    if (currentRole === "ADMIN") {
-        if(adminProfileCard) { adminProfileCard.style.opacity = "1"; adminProfileCard.style.pointerEvents = "auto"; }
-        if(adminTeacherCard) adminTeacherCard.style.display = "block";
-        if(adminAddSubBtn) adminAddSubBtn.style.display = "inline-flex";
-        if(btnAddStudent) btnAddStudent.style.display = "inline-flex";
-        if(btnBulkStudent) btnBulkStudent.style.display = "inline-flex";
-        if(adminFilterWrapper) adminFilterWrapper.style.display = "flex";
-        if(teacherFilterWrapper) teacherFilterWrapper.style.display = "none";
-        setupBadge.innerHTML = `<span class="badge badge-admin">Role: Administrator</span> Full global parameters view active.`;
-        matrixBadge.innerHTML = `<span class="badge badge-admin">Role: Administrator</span> Master matrix layout modification unlocked.`;
-        matrixFilterLabel.textContent = adminSelectedSubject === "ALL" ? "All Appended Subjects Matrix" : adminSelectedSubject;
+    // 4. Render School Configuration Directory Lookups
+    const dirBox = document.getElementById('class-directory-render-box');
+    dirBox.innerHTML = "";
+    if (classList.length === 0) {
+        dirBox.innerHTML = `<p style="color:#64748b; font-size:12px;">No active structural classes or subjects registered.</p>`;
     } else {
-        if(adminProfileCard) { adminProfileCard.style.opacity = "0.5"; adminProfileCard.style.pointerEvents = "none"; }
-        if(adminTeacherCard) adminTeacherCard.style.display = "none";
-        if(adminAddSubBtn) adminAddSubBtn.style.display = "none";
-        if(btnAddStudent) btnAddStudent.style.display = "none";
-        if(btnBulkStudent) btnBulkStudent.style.display = "none";
-        if(adminFilterWrapper) adminFilterWrapper.style.display = "none";
-        if(teacherFilterWrapper) teacherFilterWrapper.style.display = "flex";
-        setupBadge.innerHTML = `<span class="badge badge-teacher">Role: Subject Teacher</span> Local curriculum parameters override unlocked.`;
-        matrixBadge.innerHTML = `<span class="badge badge-teacher">Role: Subject Teacher</span> Target course mark sheet active.`;
-        matrixFilterLabel.textContent = teacherSelectedSubject;
+        classList.forEach(className => {
+            let subjectsList = Object.keys(db.classes[className].subjects || {});
+            let row = document.createElement('div');
+            row.style.marginBottom = "10px";
+            row.innerHTML = `<strong>🏫 ${className}</strong>: ${subjectsList.length > 0 ? subjectsList.map(s => `<span class="assignment-tag">${s}</span>`).join('') : '<em style="color:#94a3b8">No subjects attached</em>'}`;
+            dirBox.appendChild(row);
+        });
     }
-    renderCurriculumStructureSetup();
+
+    // 5. Render Registered Teachers Account Registry Grid Table Rows
+    const teacherTbody = document.getElementById('teacher-directory-tbody');
+    teacherTbody.innerHTML = "";
+    if (db.teachers.length === 0) {
+        teacherTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">No faculty members registered.</td></tr>`;
+    } else {
+        db.teachers.forEach(t => {
+            let tags = (t.assignments || []).map(a => `<span class="assignment-tag">${a.class} (${a.subject})</span>`).join('');
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${t.name}</strong></td>
+                <td><code>${t.id}</code></td>
+                <td><code>${t.pass}</code></td>
+                <td>${tags || '<em style="color:#94a3b8">Unassigned</em>'}</td>
+                <td>
+                    <button class="btn btn-p sm-btn" onclick="openEditTeacherModal('${t.id}', '${t.name}', '${t.pass}')">✏️ Edit</button>
+                    <button class="btn btn-danger sm-btn" onclick="adminDeleteTeacher('${t.id}')">✕</button>
+                </td>
+            `;
+            teacherTbody.appendChild(tr);
+        });
+    }
+}
+
+function populateAssignSubjectDropdown() {
+    const targetClass = document.getElementById('assign-class-select').value;
+    const subSel = document.getElementById('assign-subject-select');
+    subSel.innerHTML = "";
+    if (targetClass && db.classes[targetClass] && db.classes[targetClass].subjects) {
+        Object.keys(db.classes[targetClass].subjects).forEach(s => {
+            let opt = document.createElement('option');
+            opt.value = s; opt.textContent = s;
+            subSel.appendChild(opt);
+        });
+    }
+}
+
+// --- CURRICULUM DRIVER STEP RENDERS ---
+function refreshCurriculumDropdownSelectors() {
+    const classSel = document.getElementById('global-class-selector');
+    const subSel = document.getElementById('global-subject-selector');
+    
+    let previousClass = classSel.value;
+    let previousSub = subSel.value;
+
+    classSel.innerHTML = "";
+    subSel.innerHTML = "";
+
+    let availableClasses = [];
+    if (currentUser && currentUser.role === 'TEACHER') {
+        let mappedClasses = new Set();
+        (currentUser.assignments || []).forEach(a => mappedClasses.add(a.class));
+        availableClasses = Array.from(mappedClasses);
+    } else {
+        availableClasses = Object.keys(db.classes);
+    }
+
+    availableClasses.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        classSel.appendChild(opt);
+    });
+
+    if (previousClass && availableClasses.includes(previousClass)) {
+        classSel.value = previousClass;
+    }
+
+    handleGlobalClassChange(false); // Populate subject field dynamically without forcing full double redraw
+    if (previousSub && [...subSel.options].some(o => o.value === previousSub)) {
+        subSel.value = previousSub;
+    }
+}
+
+function handleGlobalClassChange(shouldTriggerRender = true) {
+    const targetClass = document.getElementById('global-class-selector').value;
+    const subSel = document.getElementById('global-subject-selector');
+    subSel.innerHTML = "";
+
+    if (!targetClass || !db.classes[targetClass]) return;
+
+    let subjectsToLoad = [];
+    if (currentUser && currentUser.role === 'TEACHER') {
+        (currentUser.assignments || []).forEach(a => {
+            if (a.class === targetClass) subjectsToLoad.push(a.subject);
+        });
+    } else {
+        subjectsToLoad = Object.keys(db.classes[targetClass].subjects || {});
+    }
+
+    subjectsToLoad.forEach(s => {
+        let opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        subSel.appendChild(opt);
+    });
+
+    if (shouldTriggerRender) {
+        renderCurriculumStructureSetup();
+        buildMarkMatrixLedger();
+    }
 }
 
 function renderCurriculumStructureSetup() {
     const container = document.getElementById('subject-mapping-container');
-    if(!container) return; container.innerHTML = '';
-    const effectiveFilter = (currentRole === "ADMIN") ? adminSelectedSubject : teacherSelectedSubject;
+    container.innerHTML = "";
 
-    Object.keys(systemConfig.curriculum || {}).forEach(subKey => {
-        if (currentRole === "ADMIN" && effectiveFilter !== "ALL" && subKey !== effectiveFilter) return;
-        if (currentRole === "TEACHER" && subKey !== effectiveFilter) return;
+    const activeClass = document.getElementById('global-class-selector').value;
+    const activeSub = document.getElementById('global-subject-selector').value;
 
-        const subData = systemConfig.curriculum[subKey];
-        const subBox = document.createElement('div');
-        subBox.className = 'subject-box';
-        
-        let chHTML = '';
-        subData.forEach((ch, chIdx) => {
-            let thHTML = '';
-            ch.themes.forEach((th, thIdx) => {
-                thHTML += `
-                    <div class="theme-row">
-                        <span style="color:#94a3b8; font-size:11px;">⬤</span>
-                        <input type="text" value="${th}" onchange="updateThemeString('${subKey}', ${chIdx}, ${thIdx}, this.value)" style="flex:1; padding:4px 8px; font-size:12px;">
-                    </div>`;
-            });
+    if (!activeClass || !activeSub || !db.classes[activeClass] || !db.classes[activeClass].subjects[activeSub]) {
+        container.innerHTML = `<p style="padding:15px; color:#64748b;">No evaluation matrix configuration map matches the selected structural scope criteria.</p>`;
+        return;
+    }
 
-            chHTML += `
-                <div class="chapter-box">
-                    <div class="chapter-hdr">
-                        <label class="chk-container"><input type="checkbox" ${ch.active ? 'checked' : ''} onchange="toggleChapterActive('${subKey}', ${chIdx}, this.checked)"> Active</label>
-                        <input type="text" value="${ch.chName}" onchange="updateChapterString('${subKey}', ${chIdx}, this.value)" style="flex:1; font-weight:bold; font-size:13px; padding:4px 8px;">
-                    </div>
-                    <div class="themes-container">${thHTML}</div>
-                </div>`;
-        });
+    // Default seed mapping setup structure rules fallback check
+    let chapters = db.classes[activeClass].subjects[activeSub];
+    if (chapters.length === 0) {
+        // Seed standard layout default mock matrix architecture structures inside fresh rows
+        chapters.push(
+            { chName: "Chapter 1 Evaluation Segment", active: true, themes: ["Basic Foundational Knowledge Module", "Practical Execution Concept Application"] },
+            { chName: "Chapter 2 Progression Segment", active: true, themes: ["Analytical Framework Implementation Assessment"] }
+        );
+        syncStateToBackendCloud();
+    }
 
-        subBox.innerHTML = `<div class="subject-hdr"><span>📚 ${subKey} Configuration Overview</span></div><div style="padding-bottom:10px;">${chHTML}</div>`;
-        container.appendChild(subBox);
+    chapters.forEach((ch, chIdx) => {
+        let chBox = document.createElement('div');
+        chBox.style.background = "#fafafa";
+        chBox.style.border = "1px solid #cbd5e1";
+        chBox.style.padding = "15px";
+        chBox.style.borderRadius = "6px";
+        chBox.style.marginBottom = "15px";
+
+        let themesHTML = ch.themes.map((th, thIdx) => `
+            <div style="display:flex; gap:10px; margin-bottom:8px; padding-left:20px; align-items:center;">
+                <span style="color:#cbd5e1;">⬤</span>
+                <input type="text" value="${th}" onchange="updateThemeString('${activeClass}', '${activeSub}', ${chIdx}, ${thIdx}, this.value)" style="font-size:12px; padding:4px 8px;">
+                <button class="btn btn-danger sm-btn" onclick="deleteThemeRoute('${activeClass}', '${activeSub}', ${chIdx}, ${thIdx})">✕</button>
+            </div>
+        `).join('');
+
+        chBox.innerHTML = `
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+                <input type="checkbox" ${ch.active ? 'checked' : ''} onchange="toggleChapterActive('${activeClass}', '${activeSub}', ${chIdx}, this.checked)" style="width:auto;">
+                <input type="text" value="${ch.chName}" onchange="updateChapterString('${activeClass}', '${activeSub}', ${chIdx}, this.value)" style="font-weight:bold; width:70%;">
+                <button class="btn btn-success sm-btn" onclick="addThemeNode('${activeClass}', '${activeSub}', ${chIdx})">+ Add Theme Criterion</button>
+                <button class="btn btn-danger sm-btn" onclick="deleteChapterRoute('${activeClass}', '${activeSub}', ${chIdx})">Delete Chapter</button>
+            </div>
+            <div>${themesHTML}</div>
+        `;
+        container.appendChild(chBox);
     });
+
+    // Add extra inline button layout for building new chapters
+    let addChBtn = document.createElement('button');
+    addChBtn.className = "btn btn-p sm-btn";
+    addChBtn.style.marginTop = "5px";
+    addChBtn.textContent = "+ Append Structural Chapter Block Unit";
+    addChBtn.onclick = () => {
+        chapters.push({ chName: "New Module Segment Heading Unit", active: true, themes: ["New Specific Evaluation Metric Point"] });
+        syncStateToBackendCloud();
+        renderCurriculumStructureSetup();
+        buildMarkMatrixLedger();
+    };
+    container.appendChild(addChBtn);
 }
 
-function toggleChapterActive(subKey, chIdx, val) { systemConfig.curriculum[subKey][chIdx].active = val; syncStateToBackend(); }
-function updateChapterString(subKey, chIdx, val) { systemConfig.curriculum[subKey][chIdx].chName = val; syncStateToBackend(); }
-function updateThemeString(subKey, chIdx, thIdx, val) { systemConfig.curriculum[subKey][chIdx].themes[thIdx] = val; syncStateToBackend(); }
+// --- CURRICULUM LIVE VALUE UPDATE LISTENERS ---
+function toggleChapterActive(c, s, cIdx, val) { db.classes[c].subjects[s][cIdx].active = val; syncStateToBackendCloud(); buildMarkMatrixLedger(); }
+function updateChapterString(c, s, cIdx, val) { db.classes[c].subjects[s][cIdx].chName = val; syncStateToBackendCloud(); }
+function updateThemeString(c, s, cIdx, tIdx, val) { db.classes[c].subjects[s][cIdx].themes[tIdx] = val; syncStateToBackendCloud(); }
+function addThemeNode(c, s, cIdx) { db.classes[c].subjects[s][cIdx].themes.push("New Operational Assessment Metric Attribute"); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
+function deleteChapterRoute(c, s, cIdx) { db.classes[c].subjects[s].splice(cIdx, 1); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
+function deleteThemeRoute(c, s, cIdx, tIdx) { db.classes[c].subjects[s][cIdx].themes.splice(tIdx, 1); syncStateToBackendCloud(); renderCurriculumStructureSetup(); buildMarkMatrixLedger(); }
 
+// --- ADMINISTRATIVE DATA ACTION OPERATIONS ---
+async function adminCreateClass() {
+    const inp = document.getElementById('new-class-input');
+    const className = inp.value.trim();
+    if (!className) return;
+
+    if (db.classes[className]) { alert("This designated grade layout class already exists."); return; }
+    
+    db.classes[className] = { subjects: {} };
+    db.students[className] = [];
+    
+    inp.value = "";
+    await syncStateToBackendCloud();
+    await loadSystemStateFromServer(); // Run internal layout refresh cycle
+}
+
+async function adminCreateSubject() {
+    const className = document.getElementById('subject-target-class-select').value;
+    const inp = document.getElementById('new-subject-input');
+    const subjectName = inp.value.trim().toUpperCase();
+    
+    if (!className || !subjectName) return;
+    if (db.classes[className].subjects[subjectName]) { alert("This course module is already tied to this class."); return; }
+
+    db.classes[className].subjects[subjectName] = [];
+    
+    inp.value = "";
+    await syncStateToBackendCloud();
+    await loadSystemStateFromServer(); // Run internal layout refresh cycle
+}
+
+async function adminCreateTeacherAccount() {
+    const inp = document.getElementById('new-teacher-name');
+    const name = inp.value.trim();
+    if (!name) return;
+
+    const sn = db.teachers.length + 1;
+    const newId = `teacher.${sn}`;
+    const newPass = "9876";
+
+    db.teachers.push({ id: newId, name: name, pass: newPass, assignments: [] });
+    
+    inp.value = "";
+    await syncStateToBackendCloud();
+    await loadSystemStateFromServer(); // Run internal layout refresh cycle
+}
+
+async function adminDeleteTeacher(id) {
+    if(!confirm("Purge selected faculty profile registry permanently?")) return;
+    db.teachers = db.teachers.filter(t => t.id !== id);
+    await syncStateToBackendCloud();
+    await loadSystemStateFromServer();
+}
+
+async function adminAssignTeacherCourseRoute() {
+    const tId = document.getElementById('assign-teacher-select').value;
+    const className = document.getElementById('assign-class-select').value;
+    const subName = document.getElementById('assign-subject-select').value;
+
+    if (!tId || !className || !subName) { alert("Ensure valid selections across all registration input categories."); return; }
+
+    let teacher = db.teachers.find(t => t.id === tId);
+    if (!teacher) return;
+
+    if (!teacher.assignments) teacher.assignments = [];
+    
+    // Check duplication conflicts
+    let exists = teacher.assignments.some(a => a.class === className && a.subject === subName);
+    if (exists) { alert("This assignment path profile has already been mapped."); return; }
+
+    teacher.assignments.push({ class: className, subject: subName });
+    await syncStateToBackendCloud();
+    await loadSystemStateFromServer(); // Run internal layout refresh cycle
+}
+
+// --- FACULTY DATA PROFILE EDIT SYSTEM MODALS ---
+function openEditTeacherModal(id, name, pass) {
+    document.getElementById('edit-teacher-index-id').value = id;
+    document.getElementById('edit-teacher-name').value = name;
+    document.getElementById('edit-teacher-login-id').value = id; 
+    document.getElementById('edit-teacher-password').value = pass;
+    document.getElementById('edit-teacher-modal').style.display = "flex";
+}
+function closeEditTeacherModal() { document.getElementById('edit-teacher-modal').style.display = "none"; }
+
+async function adminSubmitTeacherUpdate() {
+    const id = document.getElementById('edit-teacher-index-id').value;
+    const name = document.getElementById('edit-teacher-name').value.trim();
+    const pass = document.getElementById('edit-teacher-password').value.trim();
+
+    let teacher = db.teachers.find(t => t.id === id);
+    if (teacher) {
+        teacher.name = name;
+        teacher.pass = pass;
+        await syncStateToBackendCloud();
+        closeEditTeacherModal();
+        await loadSystemStateFromServer();
+    }
+}
+
+// --- SECURE MATRIX ASSESSMENT ENTRIES SHEET ---
 function buildMarkMatrixLedger() {
     const table = document.getElementById('matrix-table');
-    if(!table) return; table.innerHTML = '';
-    const activeWorkingFilter = (currentRole === "ADMIN") ? adminSelectedSubject : teacherSelectedSubject;
+    table.innerHTML = "";
 
-    let h1 = `<tr><th rowspan="3" style="min-width:45px;">S.N.</th><th rowspan="3" style="min-width:200px;">Full Legal Student Name</th><th rowspan="3" style="min-width:70px;">Roll No</th>`;
-    let h2 = `<tr>`; let h3 = `<tr>`;
+    const activeClass = document.getElementById('global-class-selector').value;
+    const activeSub = document.getElementById('global-subject-selector').value;
 
-    Object.keys(systemConfig.curriculum || {}).forEach(subKey => {
-        if (currentRole === "ADMIN" && activeWorkingFilter !== "ALL" && activeWorkingFilter !== subKey) return;
-        if (currentRole === "TEACHER" && activeWorkingFilter !== subKey) return;
+    if (!activeClass || !activeSub || !db.classes[activeClass] || !db.classes[activeClass].subjects[activeSub]) {
+        table.innerHTML = `<tr><td style="padding:15px; color:#64748b;">No structural context active to display an evaluation matrix spreadsheet.</td></tr>`;
+        return;
+    }
 
-        let activeThemesInSubject = 0; let activeChaptersInSubject = 0;
-        systemConfig.curriculum[subKey].forEach(ch => {
-            if(ch.active) { activeThemesInSubject += ch.themes.length; activeChaptersInSubject++; }
+    let chs = db.classes[activeClass].subjects[activeSub];
+    
+    let h1 = `<tr><th rowspan="3" style="width:45px;">S.N.</th><th rowspan="3" style="min-width:180px;">Full Legal Student Name</th><th rowspan="3" style="width:75px;">Roll No</th>`;
+    let h2 = `<tr>`;
+    let h3 = `<tr>`;
+
+    let activeChaptersCount = 0;
+    chs.forEach((ch, cIdx) => {
+        if (!ch.active) return;
+        activeChaptersCount++;
+        let themeCount = ch.themes.length;
+        h1 += `<th colspan="${themeCount + 1}" style="text-align:center; background:#1e3a8a;">${ch.chName}</th>`;
+        ch.themes.forEach(th => {
+            h3 += `<th style="background:#475569; font-size:10px; font-weight:normal; max-width:120px; white-space:normal; text-align:center;">${th}</th>`;
         });
-
-        if(activeThemesInSubject > 0) {
-            h1 += `<th colspan="${activeThemesInSubject + activeChaptersInSubject}" style="background:#1e3a8a;">${subKey}</th>`;
-            systemConfig.curriculum[subKey].forEach((ch, chIdx) => {
-                if(ch.active) {
-                    h2 += `<th colspan="${ch.themes.length}" style="background:#334155;">${ch.chName}</th><th rowspan="2" class="ch-avg-col" style="background:#475569; color:white; font-size:10px;">Ch Avg</th>`;
-                    ch.themes.forEach(th => { h3 += `<th style="background:#64748b; font-size:9px; min-width:70px; max-width:110px; white-space:normal;">${th}</th>`; });
-                }
-            });
-        }
+        h2 += `<th colspan="${themeCount}" style="background:#334155; text-align:center; font-size:10px;">Evaluation Parameters</th><th rowspan="2" class="ch-avg-col" style="background:#0f172a; color:white;">Ch Avg</th>`;
     });
 
     h1 += `</tr>`; h2 += `</tr>`; h3 += `</tr>`;
     table.innerHTML = `<thead>${h1}${h2}${h3}</thead><tbody id="matrix-body-rows"></tbody>`;
-    renderMatrixStudentDataRows(activeWorkingFilter);
-}
 
-function renderMatrixStudentDataRows(activeWorkingFilter) {
+    // Render Student Data Rows Into Spreadsheet Skeleton Frame
     const tbody = document.getElementById('matrix-body-rows');
-    if(!tbody) return; tbody.innerHTML = '';
+    let studentsList = db.students[activeClass] || [];
 
-    systemConfig.students.forEach((student, sIdx) => {
-        const tr = document.createElement('tr');
-        let isMetaDisabled = currentRole === "TEACHER" ? "disabled" : "";
+    if (studentsList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${5 + (activeChaptersCount * 5)}" style="text-align:center; color:#64748b; padding:20px;">No student records attached to this class. Append a student row to begin entering metrics.</td></tr>`;
+        return;
+    }
+
+    studentsList.forEach((stud, sIdx) => {
+        let tr = document.createElement('tr');
         let cells = `<td>${sIdx + 1}</td>
-            <td><input type="text" value="${student.name || ''}" onchange="updateStudentMeta(${sIdx}, 'name', this.value)" ${isMetaDisabled}></td>
-            <td><input type="text" value="${student.roll || ''}" onchange="updateStudentMeta(${sIdx}, 'roll', this.value)" ${isMetaDisabled}></td>`;
+            <td><input type="text" value="${stud.name || ''}" onchange="updateStudentMetaDataContext(${sIdx}, 'name', this.value)" style="font-weight:600;"></td>
+            <td><input type="number" value="${stud.roll || ''}" onchange="updateStudentMetaDataContext(${sIdx}, 'roll', this.value)" style="text-align:center;"></td>`;
 
-        Object.keys(systemConfig.curriculum || {}).forEach(subKey => {
-            const isColumnVisible = (currentRole === "ADMIN" && activeWorkingFilter === "ALL") || (activeWorkingFilter === subKey);
-            systemConfig.curriculum[subKey].forEach((ch, chIdx) => {
-                if(ch.active) {
-                    let totalChMarks = 0; let evaluatedThemesCount = 0;
-                    ch.themes.forEach((th, thIdx) => {
-                        const scoreKey = `${subKey}_C${chIdx}_T${thIdx}`;
-                        const currentVal = student.marks[scoreKey] || '';
-                        if(currentVal !== '') { totalChMarks += parseFloat(currentVal); evaluatedThemesCount++; }
-
-                        if(isColumnVisible) {
-                            let isInputLocked = (currentRole === "TEACHER" && subKey !== teacherSelectedSubject) ? "disabled" : "";
-                            cells += `<td><input type="number" class="mark-input" value="${currentVal}" ${isInputLocked} oninput="liveValidateRecompute(this, ${sIdx}, '${scoreKey}', '${subKey}', ${chIdx})"></td>`;
-                        }
-                    });
-                    if(isColumnVisible) {
-                        cells += `<td class="ch-avg-col" id="avg_${sIdx}_${subKey}_C${chIdx}">${evaluatedThemesCount > 0 ? (totalChMarks / evaluatedThemesCount).toFixed(2) : '—'}</td>`;
-                    }
-                }
+        chs.forEach((ch, cIdx) => {
+            if (!ch.active) return;
+            let total = 0; let count = 0;
+            ch.themes.forEach((th, tIdx) => {
+                let scoreKey = `${activeSub}_C${cIdx}_T${tIdx}`;
+                let scoreVal = stud.marks[scoreKey] !== undefined ? stud.marks[scoreKey] : "";
+                
+                if (scoreVal !== "") { total += parseFloat(scoreVal); count++; }
+                
+                cells += `<td><input type="number" class="mark-input" min="1" max="4" value="${scoreVal}" oninput="liveMatrixScoreCalculation(this, ${sIdx}, '${scoreKey}', '${activeClass}', '${activeSub}', ${cIdx})"></td>`;
             });
+            let avg = count > 0 ? (total / count).toFixed(2) : "—";
+            cells += `<td class="ch-avg-col" id="avg_${sIdx}_C${cIdx}">${avg}</td>`;
         });
+
         tr.innerHTML = cells;
         tbody.appendChild(tr);
     });
 }
 
-function updateStudentMeta(sIdx, field, value) {
-    if(currentRole !== "ADMIN") return;
-    systemConfig.students[sIdx][field] = value;
-    syncStateToBackend();
+function updateStudentMetaDataContext(sIdx, field, val) {
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (db.students[activeClass] && db.students[activeClass][sIdx]) {
+        db.students[activeClass][sIdx][field] = val;
+        syncStateToBackendCloud();
+    }
 }
 
-function liveValidateRecompute(inputEl, sIdx, scoreKey, subKey, chIdx) {
+function liveMatrixScoreCalculation(inputEl, sIdx, scoreKey, className, subName, cIdx) {
     let val = inputEl.value.trim();
-    if (val === '') { delete systemConfig.students[sIdx].marks[scoreKey]; } 
-    else { systemConfig.students[sIdx].marks[scoreKey] = parseFloat(val); }
-    
-    let chTotal = 0; let chCount = 0;
-    systemConfig.curriculum[subKey][chIdx].themes.forEach((_, thIdx) => {
-        let score = parseFloat(systemConfig.students[sIdx].marks[`${subKey}_C${chIdx}_T${thIdx}`]);
-        if(!isNaN(score)) { chTotal += score; chCount++; }
+    if (val === "") {
+        delete db.students[className][sIdx].marks[scoreKey];
+    } else {
+        let numericValue = parseFloat(val);
+        if (numericValue < 1 || numericValue > 4) { inputEl.style.background = "#fee2e2"; return; }
+        inputEl.style.background = "";
+        db.students[className][sIdx].marks[scoreKey] = numericValue;
+    }
+
+    // Dynamic UI cell recalculation without standard template visual refresh lag
+    let ch = db.classes[className].subjects[subName][cIdx];
+    let total = 0; let count = 0;
+    ch.themes.forEach((_, tIdx) => {
+        let s = db.students[className][sIdx].marks[`${subName}_C${cIdx}_T${tIdx}`];
+        if (s !== undefined && s !== "") { total += parseFloat(s); count++; }
     });
-    const indicator = document.getElementById(`avg_${sIdx}_${subKey}_C${chIdx}`);
-    if(indicator) indicator.textContent = chCount > 0 ? (chTotal / chCount).toFixed(2) : '—';
+
+    const targetAvgCell = document.getElementById(`avg_${sIdx}_C${cIdx}`);
+    if (targetAvgCell) targetAvgCell.textContent = count > 0 ? (total / count).toFixed(2) : "—";
 }
 
 function addNewStudent() {
-    if(currentRole !== "ADMIN") return;
-    systemConfig.students.push({ id: Date.now(), name: '', roll: systemConfig.students.length + 1, marks: {} });
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (!activeClass) { alert("Create or choose a target Class environment context node first."); return; }
+    if (!db.students[activeClass]) db.students[activeClass] = [];
+
+    db.students[activeClass].push({
+        id: Date.now() + Math.random(),
+        name: "",
+        roll: db.students[activeClass].length + 1,
+        marks: {}
+    });
+
+    syncStateToBackendCloud();
     buildMarkMatrixLedger();
-    syncStateToBackend();
+}
+
+function importBulkStudents() {
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (!activeClass) return;
+    let raw = prompt("Paste student names (one per line):");
+    if (!raw) return;
+
+    let lines = raw.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    if (!db.students[activeClass]) db.students[activeClass] = [];
+
+    lines.forEach(name => {
+        db.students[activeClass].push({
+            id: Date.now() + Math.random(),
+            name: name,
+            roll: db.students[activeClass].length + 1,
+            marks: {}
+        });
+    });
+
+    syncStateToBackendCloud();
+    buildMarkMatrixLedger();
 }
 
 async function saveActiveMarksToStorage() {
-    await syncStateToBackend();
-    alert("Data successfully synchronized with the cloud database!");
+    await syncStateToBackendCloud();
+    alert("Local workspace evaluation metrics synchronized smoothly with the cloud architecture cluster.");
 }
 
+// --- REPORT CARD COMPILATION DISPLAY CENTER PRINT ENGINE ---
+function buildPrintingDashboardControls() {
+    const grid = document.getElementById('print-student-checkbox-grid');
+    grid.innerHTML = "";
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (!activeClass || !db.students[activeClass] || db.students[activeClass].length === 0) {
+        grid.innerHTML = `<p style="color:#64748b; font-size:12px; padding:10px;">No available student workspace metrics compiled to run layout cards.</p>`;
+        return;
+    }
+
+    db.students[activeClass].forEach(st => {
+        let lbl = document.createElement('label');
+        lbl.style.display = "flex"; lbl.style.alignItems = "center"; lbl.style.gap = "8px";
+        lbl.style.padding = "6px"; lbl.style.background = "#f8fafc"; lbl.style.borderRadius = "4px";
+        lbl.innerHTML = `<input type="checkbox" checked value="${st.id}" class="print-student-selector-chk" style="width:auto;"> Row ${st.roll}: ${st.name || 'Unnamed'}`;
+        lbl.querySelector('input').onchange = () => compileReportSheetsDOM();
+        grid.appendChild(lbl);
+    });
+    compileReportSheetsDOM();
+}
+
+function compileReportSheetsDOM() {
+    const area = document.getElementById('print-area');
+    area.innerHTML = "";
+
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (!activeClass || !db.students[activeClass]) return;
+
+    const selectedStyle = document.getElementById('print-layout-mode').value;
+    const checkedIds = Array.from(document.querySelectorAll('.print-student-selector-chk:checked')).map(el => parseFloat(el.value));
+
+    let targets = db.students[activeClass].filter(s => checkedIds.includes(s.id));
+
+    targets.forEach(student => {
+        let card = document.createElement('div');
+        card.className = "report-card";
+
+        let headerHTML = `
+            <div style="text-align:center; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:10px;">
+                <h2 style="text-transform:uppercase; font-size:18px; color:var(--primary);">Sirjana Secondary School Evaluation Profile</h2>
+                <p style="font-size:11px; color:#475569;">Bharatpur-9, Chitwan, Nepal | CAS Continuous Assessment System Ledger</p>
+                <div style="display:flex; justify-content:space-between; margin-top:15px; font-size:12px; font-weight:bold; background:#f1f5f9; padding:6px 12px; border-radius:4px;">
+                    <span>Student Name: ${student.name || '____________'}</span>
+                    <span>Class Scope: ${activeClass}</span>
+                    <span>Roll No: ${student.roll}</span>
+                </div>
+            </div>
+        `;
+
+        let bodyTableHTML = "";
+        if (selectedStyle === "CONSOLIDATED") {
+            bodyTableHTML = `<table class="sheet"><thead><tr><th>Course Domain Subject</th><th>Overall Formative Achievement Band Status</th></tr></thead><tbody>`;
+            Object.keys(db.classes[activeClass].subjects || {}).forEach(sub => {
+                let totalSum = 0; let totalCount = 0;
+                db.classes[activeClass].subjects[sub].forEach((ch, cIdx) => {
+                    if (!ch.active) return;
+                    ch.themes.forEach((_, tIdx) => {
+                        let sc = student.marks[`${sub}_C${cIdx}_T${tIdx}`];
+                        if (sc !== undefined && sc !== "") { totalSum += parseFloat(sc); totalCount++; }
+                    });
+                });
+                let finalAvg = totalCount > 0 ? (totalSum / totalCount).toFixed(2) : "Unevaluated";
+                bodyTableHTML += `<tr><td><strong>${sub}</strong></td><td><strong>${finalAvg}</strong></td></tr>`;
+            });
+            bodyTableHTML += `</tbody></table>`;
+        } else {
+            bodyTableHTML = `<table class="sheet"><thead><tr><th>Subject / Chapter Module Units</th><th>Achievement Progress Metric Scale Band Rating</th></tr></thead><tbody>`;
+            Object.keys(db.classes[activeClass].subjects || {}).forEach(sub => {
+                bodyTableHTML += `<tr style="background:#e2e8f0;"><td colspan="2"><strong>📚 Subject Core: ${sub}</strong></td></tr>`;
+                db.classes[activeClass].subjects[sub].forEach((ch, cIdx) => {
+                    if (!ch.active) return;
+                    let chSum = 0; let chCount = 0;
+                    ch.themes.forEach((_, tIdx) => {
+                        let sc = student.marks[`${sub}_C${cIdx}_T${tIdx}`];
+                        if (sc !== undefined && sc !== "") { chSum += parseFloat(sc); chCount++; }
+                    });
+                    let chAvg = chCount > 0 ? (chSum / chCount).toFixed(2) : "—";
+                    bodyTableHTML += `<tr><td style="padding-left:20px;">• ${ch.chName}</td><td><strong>${chAvg}</strong></td></tr>`;
+                });
+            });
+            bodyTableHTML += `</tbody></table>`;
+        }
+
+        let footerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-top:50px; font-size:11px; border-top:1px dashed #cbd5e1; padding-top:20px;">
+                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">Class Teacher</div>
+                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">School Seal</div>
+                <div style="border-top:1px solid #000; width:150px; text-align:center; padding-top:5px; font-weight:bold;">Principal Approval</div>
+            </div>
+        `;
+
+        card.innerHTML = headerHTML + bodyTableHTML + footerHTML;
+        area.appendChild(card);
+    });
+}
+
+function executeSystemPrintJob() {
+    const activeClass = document.getElementById('global-class-selector').value;
+    if (!activeClass || !db.students[activeClass] || db.students[activeClass].length === 0) {
+        alert("Compile performance criteria sheets inside the desk views before pushing data fields downstream to hardware print queues.");
+        return;
+    }
+    window.print();
+}
+
+// --- PORTAL LOGIN DELEGATION SECURITY VALIDATION PIPELINE ---
+function runAuthPipeline() {
+    const userInp = document.getElementById('user-input').value.trim();
+    const passInp = document.getElementById('pass-input').value.trim();
+    const errEl = document.getElementById('auth-error');
+
+    if (userInp === "admin" && passInp === "admin123") {
+        currentUser = { role: "ADMIN", name: "System Administrator Node" };
+        launchAuthorizedApplicationSession();
+    } else {
+        // Run lookups inside the active registered teacher accounts arrays matrix
+        let teacher = db.teachers.find(t => t.id === userInp && t.pass === passInp);
+        if (teacher) {
+            currentUser = { role: "TEACHER", id: teacher.id, name: teacher.name, assignments: teacher.assignments || [] };
+            launchAuthorizedApplicationSession();
+        } else {
+            errEl.textContent = "Authentication credentials rejected. Re-enter authorization access tokens.";
+            errEl.style.display = "block";
+        }
+    }
+}
+
+function launchAuthorizedApplicationSession() {
+    document.getElementById('login-modal').style.display = "none";
+    document.getElementById('main-application-content').style.display = "block";
+    document.getElementById('user-display-profile').textContent = `👤 ${currentUser.name} (${currentUser.role})`;
+
+    if (currentUser.role === "TEACHER") {
+        document.getElementById('admin-only-dashboard-wrapper').style.display = "none";
+        document.getElementById('teacher-welcome-dashboard-wrapper').style.display = "block";
+        document.getElementById('teacher-welcome-name').textContent = currentUser.name;
+        document.getElementById('admin-add-student-row-btn').style.display = "none";
+        document.getElementById('admin-bulk-student-btn').style.display = "none";
+    } else {
+        document.getElementById('admin-only-dashboard-wrapper').style.display = "block";
+        document.getElementById('teacher-welcome-dashboard-wrapper').style.display = "none";
+        document.getElementById('admin-add-student-row-btn').style.display = "inline-flex";
+        document.getElementById('admin-bulk-student-btn').style.display = "inline-flex";
+    }
+
+    // Refresh application context variables dynamically
+    refreshCurriculumDropdownSelectors();
+    goStep(1);
+}
+
+function terminateSession() {
+    currentUser = null;
+    document.getElementById('user-input').value = "";
+    document.getElementById('pass-input').value = "";
+    document.getElementById('auth-error').style.display = "none";
+    document.getElementById('login-modal').style.display = "flex";
+    document.getElementById('main-application-content').style.display = "none";
+    document.getElementById('print-area').style.display = "none";
+}
+
+// --- GLOBAL APP STEP PANELS NAVIGATION CONTROLLER ---
 function goStep(stepNum) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById(`st-${stepNum}`).classList.add('active');
-    
-    if(stepNum === 1) { document.getElementById('panel-setup').classList.add('active'); renderCurriculumStructureSetup(); } 
-    else if(stepNum === 2) { buildMarkMatrixLedger(); document.getElementById('panel-marks').classList.add('active'); } 
-    else if(stepNum === 3) { document.getElementById('panel-print').classList.add('active'); buildPrintingDashboardControls(); }
+
+    const printArea = document.getElementById('print-area');
+
+    if (stepNum === 1) {
+        document.getElementById('panel-admin').classList.add('active');
+        printArea.style.display = "none";
+    } else if (stepNum === 2) {
+        refreshCurriculumDropdownSelectors();
+        document.getElementById('panel-setup').classList.add('active');
+        printArea.style.display = "none";
+    } else if (stepNum === 3) {
+        buildMarkMatrixLedger();
+        document.getElementById('panel-marks').classList.add('active');
+        printArea.style.display = "none";
+    } else if (stepNum === 4) {
+        document.getElementById('panel-print').classList.add('active');
+        buildPrintingDashboardControls();
+        printArea.style.display = "flex"; // Show print sheets workspace layout panel grid
+    }
 }
 
-window.onload = function() { loadSystemState(); };
+// Global Core Initialization Entry Point
+window.onload = function() {
+    loadSystemStateFromServer();
+};
 </script>
 </body>
 </html>
