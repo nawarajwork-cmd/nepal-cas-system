@@ -74,10 +74,12 @@ try {
                 'Content-Type':'application/json'
             },
 
-            body: JSON.stringify({
-                username,
-                password
-            })
+body: JSON.stringify({
+    username,
+    password,
+    role: document.getElementById('login-role').value
+})
+
         });
 
     const data =
