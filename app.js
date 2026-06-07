@@ -317,10 +317,7 @@ try {
         );
     }
 
-    alert(
-`Teacher Created
-Username: ${data.teacher.username}
-Password: ${data.password}` );
+    alert( "Teacher Created\n\n" + "Username: " + data.teacher.username + "\n\nPassword: " + data.password );
     document.getElementById(
         'teacher-name'
     ).value = '';
