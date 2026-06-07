@@ -572,19 +572,32 @@ function shiftPanel(stepNum) {
 // Function to create a new teacher via API
 async function createNewTeacher() {
     const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE}/api/admin/teachers`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
+    console.log("Attempting to create teacher with token:", token); // DEBUG
     
-    if (res.ok) {
-        alert("Teacher created successfully!");
-        loadAdminDashboard(); // Refresh the list
-    } else {
-        alert("Failed to create teacher.");
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/teachers`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}` 
+            }
+        });
+
+        const result = await response.json();
+        console.log("Server response:", result); // DEBUG
+
+        if (!response.ok) {
+            alert(`Error: ${result.error || 'Failed to create'}`);
+            return;
+        }
+
+        alert(`New Teacher Created! Username: ${result.teacher.username}`);
+        loadAdminDashboard();
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Check console for network error details.");
     }
 }
-window.onload = function() { bootstrapApplicationNode(); };
+
 // Ensure loadAdminDashboard() from our previous step is also here to pull the data
 /**
  * Fetches and renders the Admin dashboard state.
@@ -666,4 +679,4 @@ async function createNewTeacher() {
         alert("Error creating teacher. Ensure you are logged in as Admin.");
     }
 }
-
+window.onload = function() { bootstrapApplicationNode(); };
