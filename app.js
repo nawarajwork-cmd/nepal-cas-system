@@ -584,7 +584,7 @@ async function createNewTeacher() {
         alert("Failed to create teacher.");
     }
 }
-
+window.onload = function() { bootstrapApplicationNode(); };
 // Ensure loadAdminDashboard() from our previous step is also here to pull the data
 /**
  * Fetches and renders the Admin dashboard state.
@@ -639,5 +639,31 @@ async function loadAnalytics() {
         </div>
     `).join('');
 }
+/**
+ * Triggers the backend to auto-generate a new teacher record
+ * and adds it to the database.
+ */
+async function createNewTeacher() {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/teachers`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}` 
+            }
+        });
 
-window.onload = function() { bootstrapApplicationNode(); };
+        if (!response.ok) throw new Error('Failed to create teacher');
+
+        const result = await response.json();
+        alert(`New Teacher Created!\nUsername: ${result.teacher.username}\nPassword: ${result.teacher.password}`);
+        
+        // Refresh the dashboard to show the new teacher in the list
+        loadAdminDashboard();
+    } catch (err) {
+        console.error(err);
+        alert("Error creating teacher. Ensure you are logged in as Admin.");
+    }
+}
+
