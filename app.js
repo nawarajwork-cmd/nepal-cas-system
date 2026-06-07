@@ -515,7 +515,23 @@ function shiftPanel(stepNum) {
         assembleOfficialReportCards(); document.getElementById('view-print').classList.add('active');
     }
 }
+// Function to create a new teacher via API
+async function createNewTeacher() {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE}/api/admin/teachers`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (res.ok) {
+        alert("Teacher created successfully!");
+        loadAdminDashboard(); // Refresh the list
+    } else {
+        alert("Failed to create teacher.");
+    }
+}
 
+// Ensure loadAdminDashboard() from our previous step is also here to pull the data
 /**
  * Fetches and renders the Admin dashboard state.
  * Call this function whenever the Admin tab is opened or an action is completed.
@@ -569,4 +585,5 @@ async function loadAnalytics() {
         </div>
     `).join('');
 }
+
 window.onload = function() { bootstrapApplicationNode(); };
