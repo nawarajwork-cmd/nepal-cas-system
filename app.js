@@ -1034,11 +1034,10 @@ function toggleChapter(chapterId, isSelected) {
 
   });
 }
+renderCurriculum()
 // ====================================================== // LOAD APP // ======================================================
 window.onload = () => {
-
   fetchChapters();
-
 };
 window.onload = function() {
 bootstrapApplicationNode();
