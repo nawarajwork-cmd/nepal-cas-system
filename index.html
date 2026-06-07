@@ -67,27 +67,33 @@
             </h3>
             <div id="curriculum-rendering-node"></div>
         </div>
-        <div id="admin-panel">
-    <h3>Teacher Management</h3>
-    <table>
-        <thead>
-            <tr><th>Username</th><th>Password</th></tr>
-        </thead>
-        <tbody id="teacher-list-body">
-            </tbody>
-    </table>
 
-    <h3>Subject Assignments</h3>
-    <table>
-        <thead>
-            <tr><th>Teacher</th><th>Subject</th></tr>
-        </thead>
-        <tbody id="assignment-list-body">
-            </tbody>
-    </table>
+
+        <div id="admin-panel" style="display:none;">
+    <h2>Admin Dashboard</h2>
     
-    <button onclick="loadAdminDashboard()">Refresh Dashboard Data</button>
+    <section>
+        <h3>Add New Teacher</h3>
+        <button onclick="createNewTeacher()">Generate New Teacher Account</button>
+    </section>
+
+    <section>
+        <h3>System Overview</h3>
+        <table id="teacher-table" border="1">
+            <thead><tr><th>Username</th><th>Default Password</th></tr></thead>
+            <tbody id="teacher-list-body"></tbody>
+        </table>
+
+        <h3>Current Assignments</h3>
+        <table id="assignment-table" border="1">
+            <thead><tr><th>Teacher</th><th>Subject</th></tr></thead>
+            <tbody id="assignment-list-body"></tbody>
+        </table>
+    </section>
 </div>
+
+
+        
     </div>
 
     <div class="panel" id="view-marks">
