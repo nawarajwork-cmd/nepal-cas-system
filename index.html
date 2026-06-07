@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="admin-panel" style="display:none;">
-    </div>
 <div id="login-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.98); z-index:99999; display:flex; align-items:center; justify-content:center;">
     <div style="background:#fff; padding:35px; border-radius:12px; width:100%; max-width:400px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.55);">
         <h2 style="color:#0f172a; margin-bottom:5px; font-size:22px; text-align:center;">Nepal CAS Architecture</h2>
@@ -73,10 +71,14 @@
         <div id="admin-panel" style="display:none;">
     <h2>Admin Dashboard</h2>
     
-    <section>
-        <h3>Add New Teacher</h3>
-        <button onclick="createNewTeacher()">Generate New Teacher Account</button>
-    </section>
+   
+        
+    <section id="teacher-management">
+    <h3>Add New Teacher</h3>
+    <button onclick="createNewTeacher()" class="btn-primary">
+        Generate New Teacher Account
+    </button>
+</section>
 
     <section>
         <h3>System Overview</h3>
@@ -91,6 +93,13 @@
             <tbody id="assignment-list-body"></tbody>
         </table>
     </section>
+    
+    <section id="teacher-management">
+    <h3>Teacher Management</h3>
+    <button onclick="createNewTeacher()" class="btn-primary">
+        Generate New Teacher Account
+    </button>
+</section>
 </div>
 
 
