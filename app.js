@@ -1,37 +1,55 @@
 const API_BASE = "https://cas-backend-s9ba.onrender.com"; // VERIFY YOUR URL
+const API_BASE = "https://your-backend-url.com/api";
 
-async function handleLogin(username, password) {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+// --- STATE MANAGEMENT ---
+// Note: We use sessionStorage instead of localStorage to ensure data 
+// clears when the browser tab is closed (Remote-friendly).
+const getToken = () => sessionStorage.getItem('token');
+const getRole = () => sessionStorage.getItem('role');
+
+async function runAuthPipeline() {
+    const username = document.getElementById('user-input').value;
+    const password = document.getElementById('pass-input').value;
+    const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
     const data = await res.json();
     if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
-        if (data.role === 'admin') {
-            document.getElementById('admin-panel').style.display = 'block';
-            loadAdminDashboard();
-        }
-    } else { alert("Login Failed"); }
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('role', data.role);
+        window.location.reload(); // Internal refresh requirement met
+    }
 }
 
-async function loadAdminDashboard() {
-    const res = await fetch(`${API_BASE}/api/admin/dashboard-data`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    });
-    const data = await res.json();
-    document.getElementById('teacher-list-body').innerHTML = data.teachers.map(t => 
-        `<tr><td>${t.username}</td><td>${t.password}</td></tr>`).join('');
-    document.getElementById('assignment-list-body').innerHTML = data.assignments.map(a => 
-        `<tr><td>${a.username}</td><td>${a.name}</td></tr>`).join('');
-}
-
-async function createNewTeacher() {
-    await fetch(`${API_BASE}/api/admin/teachers`, {
+// --- SECURE ACTION ---
+async function adminAction(endpoint, body) {
+    await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}` 
+        },
+        body: JSON.stringify(body)
     });
-    loadAdminDashboard();
+    window.location.reload(); // Ensures the UI updates immediately from Database
 }
+
+// --- DASHBOARD RENDERING ---
+function renderDashboard() {
+    const role = getRole();
+    if (role === 'TEACHER') {
+        // Hide Admin UI elements by class name
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    }
+    // Logic to fetch and display curriculum
+}
+
+window.onload = () => {
+    if (!getToken()) {
+        document.getElementById('login-modal').style.display = 'flex';
+    } else {
+        renderDashboard();
+    }
+};
