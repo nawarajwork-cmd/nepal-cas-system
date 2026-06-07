@@ -67,6 +67,27 @@
             </h3>
             <div id="curriculum-rendering-node"></div>
         </div>
+        <div id="admin-panel">
+    <h3>Teacher Management</h3>
+    <table>
+        <thead>
+            <tr><th>Username</th><th>Password</th></tr>
+        </thead>
+        <tbody id="teacher-list-body">
+            </tbody>
+    </table>
+
+    <h3>Subject Assignments</h3>
+    <table>
+        <thead>
+            <tr><th>Teacher</th><th>Subject</th></tr>
+        </thead>
+        <tbody id="assignment-list-body">
+            </tbody>
+    </table>
+    
+    <button onclick="loadAdminDashboard()">Refresh Dashboard Data</button>
+</div>
     </div>
 
     <div class="panel" id="view-marks">
