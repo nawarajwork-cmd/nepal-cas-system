@@ -1052,6 +1052,132 @@ try {
     alert(err.message);
 }
 }
+
+async function editChapter(id, oldName) {
+
+    const newName =
+        prompt(
+            'Edit Chapter Name',
+            oldName
+        );
+
+    if(!newName) return;
+
+    await fetch(
+        `${API_BASE}/curriculum/chapter/${id}`,
+    {
+        method:'PUT',
+
+        headers:{
+            'Content-Type':'application/json',
+
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        },
+
+        body: JSON.stringify({
+            chapter_name: newName
+        })
+    });
+
+    await fetchCloudSystemState();
+}
+
+async function deleteChapter(id) {
+
+    if(!confirm(
+        'Delete this chapter?'
+    )) return;
+
+    await fetch(
+        `${API_BASE}/curriculum/chapter/${id}`,
+    {
+        method:'DELETE',
+
+        headers:{
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        }
+    });
+
+    await fetchCloudSystemState();
+}
+
+async function editTheme(id, oldName) {
+
+    const newName =
+        prompt(
+            'Edit Theme Name',
+            oldName
+        );
+
+    if(!newName) return;
+
+    await fetch(
+        `${API_BASE}/curriculum/theme/${id}`,
+    {
+        method:'PUT',
+
+        headers:{
+            'Content-Type':'application/json',
+
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        },
+
+        body: JSON.stringify({
+            theme_name: newName
+        })
+    });
+
+    await fetchCloudSystemState();
+}
+
+async function deleteTheme(id) {
+
+    if(!confirm(
+        'Delete this theme?'
+    )) return;
+
+    await fetch(
+        `${API_BASE}/curriculum/theme/${id}`,
+    {
+        method:'DELETE',
+
+        headers:{
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        }
+    });
+
+    await fetchCloudSystemState();
+}
+
+async function toggleChapter(
+    chapterId,
+    isSelected
+) {
+
+    await fetch(
+        `${API_BASE}/teacher/chapter-toggle`,
+    {
+        method:'POST',
+
+        headers:{
+            'Content-Type':'application/json',
+
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        },
+
+        body: JSON.stringify({
+
+            chapter_id: chapterId,
+
+            is_selected: isSelected
+        })
+    });
+}
 // ====================================================== // SIMPLE PANEL SWITCH // ======================================================
 function shiftPanel(step) {
 document
