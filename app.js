@@ -686,273 +686,309 @@ if(row.theme_id) {
 return map;
 }
 function renderCurriculumPanelMarkup() {
-const out =
-document.getElementById(
-    'curriculum-rendering-node'
-);
 
-out.innerHTML = '';
+    const out =
+    document.getElementById(
+        'curriculum-rendering-node'
+    );
 
-const map =
+    out.innerHTML = '';
+
+    const map =
     buildNestedCurriculumMap();
 
-Object.keys(map).forEach(sub => {
+    Object.keys(map).forEach(sub => {
 
-    const box =
+        const box =
         document.createElement('div');
 
-    box.style.border =
-    '1px solid #cbd5e1';
+        box.style.border =
+        '1px solid #cbd5e1';
 
-    box.style.borderRadius =
-    '6px';
+        box.style.borderRadius =
+        '8px';
 
-    box.style.marginBottom =
-    '20px';
+        box.style.marginBottom =
+        '20px';
 
-    let chapters = '';
+        let chapters = '';
 
-    map[sub].chapters
-    .forEach(ch => {
+        map[sub].chapters.forEach(ch => {
 
-        let themes = '';
+            let themes = '';
 
-       let themeCounter = 1;
+            let themeCounter = 1;
 
-ch.themes.forEach(th => {
+            ch.themes.forEach(th => {
 
-    themes += `
+                themes += `
 
-    <li
-        style="
-            list-style:none;
-            margin-bottom:8px;
-        "
-    >
+                <li
+                    style="
+                        list-style:none;
+                        margin-bottom:8px;
+                    "
+                >
+
+                    <div
+                        style="
+                            border:1px solid #edf2f7;
+                            background:#f8fafc;
+                            border-radius:8px;
+                            padding:10px 12px;
+
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                        "
+                    >
+
+                        <div>
+
+                            <strong>
+                                ${themeCounter}.
+                            </strong>
+
+                            ${th.name}
+
+                        </div>
+
+                        <div
+                            style="
+                                display:flex;
+                                gap:8px;
+                            "
+                        >
+
+                            <button
+                                onclick="
+                                    editTheme(
+                                        ${th.id},
+                                        '${th.name}',
+                                        '${sub}',
+                                        '${ch.name}'
+                                    )
+                                "
+                                style="
+                                    background:#0284c7;
+                                    color:#fff;
+                                    border:none;
+                                    padding:4px 8px;
+                                    border-radius:4px;
+                                    cursor:pointer;
+                                "
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                onclick="
+                                    deleteTheme(
+                                        ${th.id},
+                                        '${sub}',
+                                        '${ch.name}',
+                                        '${th.name}'
+                                    )
+                                "
+                                style="
+                                    background:#dc2626;
+                                    color:#fff;
+                                    border:none;
+                                    padding:4px 8px;
+                                    border-radius:4px;
+                                    cursor:pointer;
+                                "
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </li>
+                `;
+
+                themeCounter++;
+            });
+
+            chapters += `
+
+            <div
+                style="
+                    border:1px solid #e2e8f0;
+                    padding:15px;
+                    margin-bottom:12px;
+                    border-radius:8px;
+                    background:#fff;
+                "
+            >
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        margin-bottom:12px;
+                    "
+                >
+
+                    <div
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                        "
+                    >
+
+                        <input
+                            type="checkbox"
+
+                            ${ch.is_selected
+                            ? "checked"
+                            : ""}
+
+                            onchange="
+                                toggleChapter(
+                                    ${ch.id},
+                                    this.checked
+                                )
+                            "
+                        />
+
+                        <strong>
+                            ${ch.name}
+                        </strong>
+
+                    </div>
+
+                    <div
+                        style="
+                            display:flex;
+                            gap:8px;
+                            align-items:center;
+                        "
+                    >
+
+                        <button
+                            onclick="
+                                editChapter(
+                                    ${ch.id},
+                                    '${ch.name}',
+                                    '${sub}'
+                                )
+                            "
+                            style="
+                                background:#0284c7;
+                                color:#fff;
+                                border:none;
+                                padding:5px 10px;
+                                border-radius:5px;
+                                cursor:pointer;
+                            "
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            onclick="
+                                deleteChapter(
+                                    ${ch.id},
+                                    '${sub}',
+                                    '${ch.name}'
+                                )
+                            "
+                            style="
+                                background:#dc2626;
+                                color:#fff;
+                                border:none;
+                                padding:5px 10px;
+                                border-radius:5px;
+                                cursor:pointer;
+                            "
+                        >
+                            Delete
+                        </button>
+
+                        <button
+                            onclick="
+                                appendThemePrompt(
+                                    ${ch.id}
+                                )
+                            "
+                            style="
+                                background:#2563eb;
+                                color:#fff;
+                                border:none;
+                                padding:5px 10px;
+                                border-radius:5px;
+                                cursor:pointer;
+                            "
+                        >
+                            Add Theme
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <ol
+                    style="
+                        margin:0;
+                        padding-left:0;
+                    "
+                >
+                    ${themes}
+                </ol>
+
+            </div>
+            `;
+        });
+
+        box.innerHTML = `
 
         <div
             style="
-                border:1px solid #edf2f7;
-                background:#f8fafc;
-                border-radius:8px;
-                padding:10px 12px;
-
+                background:#1e293b;
+                color:#fff;
+                padding:12px;
                 display:flex;
                 justify-content:space-between;
                 align-items:center;
             "
         >
 
-            <div>
-
-                <strong>
-                    ${themeCounter}.
-                </strong>
-
-                ${th.name}
-
-            </div>
-
-            <div
-                style="
-                    display:flex;
-                    gap:8px;
-                "
-            >
-
-                <button
-                    onclick="
-                        editTheme(
-                            ${th.id},
-                            '${th.name}',
-                            '${sub}',
-                            '${ch.name}'
-                        )
-                    "
-                    style="
-                        background:#0284c7;
-                        color:#fff;
-                        border:none;
-                        padding:4px 8px;
-                        border-radius:4px;
-                        cursor:pointer;
-                    "
-                >
-                    Edit
-                </button>
-
-                <button
-                    onclick="
-                        deleteTheme(
-                            ${th.id},
-                            '${sub}',
-                            '${ch.name}',
-                            '${th.name}'
-                        )
-                    "
-                    style="
-                        background:#dc2626;
-                        color:#fff;
-                        border:none;
-                        padding:4px 8px;
-                        border-radius:4px;
-                        cursor:pointer;
-                    "
-                >
-                    Delete
-                </button>
-
-            </div>
-
-        </div>
-
-    </li>
-    `;
-
-    themeCounter++;
-});
-
-      chapters += `
-
-<div
-    style="
-        border:1px solid #e2e8f0;
-        padding:15px;
-        margin-bottom:12px;
-        border-radius:8px;
-        background:#fff;
-    "
->
-
-    <div
-        style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:12px;
-        "
-    >
-
-        <!-- LEFT SIDE -->
-
-        <div
-            style="
-                display:flex;
-                align-items:center;
-                gap:10px;
-            "
-        >
-
-            <input
-                type="checkbox"
-
-                ${ch.is_selected ? "checked" : ""}
-
-                onchange="
-                    toggleChapter(
-                        ${ch.id},
-                        this.checked
-                    )
-                "
-            />
-
-            <strong
-                style="
-                    font-size:15px;
-                    color:#0f172a;
-                "
-            >
-                ${ch.name}
+            <strong>
+                ${sub}
             </strong>
 
-        </div>
-
-        <!-- RIGHT SIDE -->
-
-        <div
-            style="
-                display:flex;
-                gap:8px;
-                align-items:center;
-            "
-        >
-
             <button
                 onclick="
-                    editChapter(
-                        ${ch.id},
-                        '${ch.name}',
-                        '${sub}'
-                    )
-                "
-                style="
-                    background:#0284c7;
-                    color:#fff;
-                    border:none;
-                    padding:5px 10px;
-                    border-radius:5px;
-                    cursor:pointer;
-                "
-            >
-                Edit
-            </button>
-
-            <button
-                onclick="
-                    deleteChapter(
-                        ${ch.id},
-                        '${sub}',
-                        '${ch.name}'
-                    )
-                "
-                style="
-                    background:#dc2626;
-                    color:#fff;
-                    border:none;
-                    padding:5px 10px;
-                    border-radius:5px;
-                    cursor:pointer;
-                "
-            >
-                Delete
-            </button>
-
-            <button
-                onclick="
-                    appendThemePrompt(
-                        ${ch.id}
+                    appendChapterPrompt(
+                        ${map[sub].id}
                     )
                 "
                 style="
                     background:#2563eb;
                     color:#fff;
                     border:none;
-                    padding:5px 10px;
-                    border-radius:5px;
+                    padding:6px 10px;
+                    border-radius:4px;
                     cursor:pointer;
                 "
             >
-                Add Theme
+                Add Chapter
             </button>
 
         </div>
 
-    </div>
+        <div style="padding:15px;">
+            ${chapters}
+        </div>
+        `;
 
-    <ol
-        style="
-            margin:0;
-            padding-left:0;
-        "
-    >
-        ${themes}
-    </ol>
-
-</div>
-`;
-
-    out.appendChild(box);
-});
+        out.appendChild(box);
+    });
 }
 // ====================================================== // ADD SUBJECT // ======================================================
 async function createNewSubjectNode() {
