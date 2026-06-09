@@ -717,68 +717,100 @@ Object.keys(map).forEach(sub => {
 
         let themes = '';
 
-        ch.themes.forEach(th => {
+       let themeCounter = 1;
 
-            themes += `
-            <li
+ch.themes.forEach(th => {
+
+    themes += `
+
+    <li
+        style="
+            list-style:none;
+            margin-bottom:8px;
+        "
+    >
+
+        <div
+            style="
+                border:1px solid #edf2f7;
+                background:#f8fafc;
+                border-radius:8px;
+                padding:10px 12px;
+
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+            "
+        >
+
+            <div>
+
+                <strong>
+                    ${themeCounter}.
+                </strong>
+
+                ${th.name}
+
+            </div>
+
+            <div
                 style="
-                    margin-bottom:5px;
+                    display:flex;
+                    gap:8px;
                 "
             >
-                <div
-    style="
-        display:flex;
-        align-items:center;
-        gap:10px;
-        margin-bottom:5px;
-    "
->
 
-    <span>
-        ${th.name}
-    </span>
+                <button
+                    onclick="
+                        editTheme(
+                            ${th.id},
+                            '${th.name}',
+                            '${sub}',
+                            '${ch.name}'
+                        )
+                    "
+                    style="
+                        background:#0284c7;
+                        color:#fff;
+                        border:none;
+                        padding:4px 8px;
+                        border-radius:4px;
+                        cursor:pointer;
+                    "
+                >
+                    Edit
+                </button>
 
-    <button
-        onclick="
-            editTheme(
-                ${th.id},
-                '${th.name}'
-            )
-        "
-        style="
-            background:#0284c7;
-            color:#fff;
-            border:none;
-            padding:4px 8px;
-            border-radius:4px;
-            cursor:pointer;
-        "
-    >
-        Edit
-    </button>
+                <button
+                    onclick="
+                        deleteTheme(
+                            ${th.id},
+                            '${sub}',
+                            '${ch.name}',
+                            '${th.name}'
+                        )
+                    "
+                    style="
+                        background:#dc2626;
+                        color:#fff;
+                        border:none;
+                        padding:4px 8px;
+                        border-radius:4px;
+                        cursor:pointer;
+                    "
+                >
+                    Delete
+                </button>
 
-    <button
-        onclick="
-            deleteTheme(
-                ${th.id}
-            )
-        "
-        style="
-            background:#dc2626;
-            color:#fff;
-            border:none;
-            padding:4px 8px;
-            border-radius:4px;
-            cursor:pointer;
-        "
-    >
-        Delete
-    </button>
+            </div>
 
-</div>
-            </li>
-            `;
-        });
+        </div>
+
+    </li>
+    `;
+
+    themeCounter++;
+});
 
         chapters += `
         <div
@@ -805,11 +837,106 @@ Object.keys(map).forEach(sub => {
                     <div
     style="
         display:flex;
+        justify-content:space-between;
         align-items:center;
-        gap:10px;
-        flex-wrap:wrap;
+        width:100%;
     "
 >
+
+    <div
+        style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+        "
+    >
+
+        <input
+            type="checkbox"
+
+            ${ch.is_selected ? "checked" : ""}
+
+            onchange="
+                toggleChapter(
+                    ${ch.id},
+                    this.checked
+                )
+            "
+        />
+
+        <strong>
+            ${ch.name}
+        </strong>
+
+    </div>
+
+    <div
+        style="
+            display:flex;
+            gap:8px;
+            align-items:center;
+        "
+    >
+
+        <button
+            onclick="
+                editChapter(
+                    ${ch.id},
+                    '${ch.name}',
+                    '${sub}'
+                )
+            "
+            style="
+                background:#0284c7;
+                color:#fff;
+                border:none;
+                padding:4px 8px;
+                border-radius:4px;
+                cursor:pointer;
+            "
+        >
+            Edit
+        </button>
+
+        <button
+            onclick="
+                deleteChapter(
+                    ${ch.id},
+                    '${sub}',
+                    '${ch.name}'
+                )
+            "
+            style="
+                background:#dc2626;
+                color:#fff;
+                border:none;
+                padding:4px 8px;
+                border-radius:4px;
+                cursor:pointer;
+            "
+        >
+            Delete
+        </button>
+
+        <button
+            onclick="appendThemePrompt(
+                ${ch.id}
+            )"
+            style="
+                background:#0284c7;
+                color:#fff;
+                border:none;
+                padding:5px 10px;
+                border-radius:4px;
+                cursor:pointer;
+            "
+        >
+            Add Theme
+        </button>
+
+    </div>
+
+</div>
 
     <input
         type="checkbox"
@@ -1053,11 +1180,15 @@ try {
 }
 }
 
-async function editChapter(id, oldName) {
+async function editChapter(
+    id,
+    oldName,
+    subjectName
+) {
 
     const newName =
         prompt(
-            'Edit Chapter Name',
+            `Edit Chapter\n\n${subjectName} → ${oldName}`,
             oldName
         );
 
@@ -1082,32 +1213,19 @@ async function editChapter(id, oldName) {
 
     await fetchCloudSystemState();
 }
-
-async function deleteChapter(id) {
-
-    if(!confirm(
-        'Delete this chapter?'
-    )) return;
-
-    await fetch(
-        `${API_BASE}/curriculum/chapter/${id}`,
-    {
-        method:'DELETE',
-
-        headers:{
-            'Authorization':
-            `Bearer ${SESSION_TOKEN}`
-        }
-    });
-
     await fetchCloudSystemState();
 }
 
-async function editTheme(id, oldName) {
+async function editTheme(
+    id,
+    oldName,
+    subjectName,
+    chapterName
+) {
 
     const newName =
         prompt(
-            'Edit Theme Name',
+            `Edit Theme\n\n${subjectName} → ${chapterName} → ${oldName}`,
             oldName
         );
 
@@ -1133,14 +1251,47 @@ async function editTheme(id, oldName) {
     await fetchCloudSystemState();
 }
 
-async function deleteTheme(id) {
+async function deleteTheme(
+    id,
+    subjectName,
+    chapterName,
+    themeName
+) {
 
-    if(!confirm(
-        'Delete this theme?'
-    )) return;
+    if(
+        !confirm(
+            `Delete Theme?\n\n${subjectName} → ${chapterName} → ${themeName}`
+        )
+    ) return;
 
     await fetch(
         `${API_BASE}/curriculum/theme/${id}`,
+    {
+        method:'DELETE',
+
+        headers:{
+            'Authorization':
+            `Bearer ${SESSION_TOKEN}`
+        }
+    });
+
+    await fetchCloudSystemState();
+}
+
+async function deleteChapter(
+    id,
+    subjectName,
+    chapterName
+) {
+
+    if(
+        !confirm(
+            `Delete Chapter?\n\n${subjectName} → ${chapterName}`
+        )
+    ) return;
+
+    await fetch(
+        `${API_BASE}/curriculum/chapter/${id}`,
     {
         method:'DELETE',
 
