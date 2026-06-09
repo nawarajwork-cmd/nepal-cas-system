@@ -725,7 +725,57 @@ Object.keys(map).forEach(sub => {
                     margin-bottom:5px;
                 "
             >
-                ${th.name}
+                <div
+    style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:5px;
+    "
+>
+
+    <span>
+        ${th.name}
+    </span>
+
+    <button
+        onclick="
+            editTheme(
+                ${th.id},
+                '${th.name}'
+            )
+        "
+        style="
+            background:#0284c7;
+            color:#fff;
+            border:none;
+            padding:4px 8px;
+            border-radius:4px;
+            cursor:pointer;
+        "
+    >
+        Edit
+    </button>
+
+    <button
+        onclick="
+            deleteTheme(
+                ${th.id}
+            )
+        "
+        style="
+            background:#dc2626;
+            color:#fff;
+            border:none;
+            padding:4px 8px;
+            border-radius:4px;
+            cursor:pointer;
+        "
+    >
+        Delete
+    </button>
+
+</div>
             </li>
             `;
         });
@@ -752,7 +802,70 @@ Object.keys(map).forEach(sub => {
             >
 
                 <strong>
-                    ${ch.name}
+                    <div
+    style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+    "
+>
+
+    <input
+        type="checkbox"
+
+        ${ch.is_selected ? "checked" : ""}
+
+        onchange="
+            toggleChapter(
+                ${ch.id},
+                this.checked
+            )
+        "
+    />
+
+    <strong>
+        ${ch.name}
+    </strong>
+
+    <button
+        onclick="
+            editChapter(
+                ${ch.id},
+                '${ch.name}'
+            )
+        "
+        style="
+            background:#0284c7;
+            color:#fff;
+            border:none;
+            padding:4px 8px;
+            border-radius:4px;
+            cursor:pointer;
+        "
+    >
+        Edit
+    </button>
+
+    <button
+        onclick="
+            deleteChapter(
+                ${ch.id}
+            )
+        "
+        style="
+            background:#dc2626;
+            color:#fff;
+            border:none;
+            padding:4px 8px;
+            border-radius:4px;
+            cursor:pointer;
+        "
+    >
+        Delete
+    </button>
+
+</div>
                 </strong>
 
                 <button
