@@ -1058,7 +1058,7 @@ function renderCurriculumPanelMarkup() {
 
         out.appendChild(box);
     });
-}
+})
 // ====================================================== // ADD SUBJECT // ======================================================
 async function createNewSubjectNode() {
 const subject =
