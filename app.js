@@ -1,3 +1,4 @@
+console.log("APP JS LOADED");
 const API_BASE = "https://cas-backend-s9ba.onrender.com/api";
 // ====================================================== // SESSION // ======================================================
 let SESSION_TOKEN = sessionStorage.getItem('CAS_ACTIVE_JWT') || null;
