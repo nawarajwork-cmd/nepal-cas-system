@@ -271,7 +271,7 @@ try {
     });
 
     renderCurriculumPanelMarkup();
-
+    renderMarksMatrix();
 } catch(err) {
 
     console.log(err);
@@ -1490,7 +1490,116 @@ async function executeBulkImport() {
     }
 }
 
+function renderMarksMatrix() {
+    const table = document.getElementById('data-sheet-matrix');
+    if (!table) return;
 
+    // Collect only selected chapters and their themes
+    const map = buildNestedCurriculumMap();
+    const selectedThemes = []; // { subjectCode, chapterName, themeId, themeName }
+
+    Object.keys(map).forEach(sub => {
+        map[sub].chapters.forEach(ch => {
+            if (ch.is_selected) {
+                ch.themes.forEach(th => {
+                    selectedThemes.push({
+                        subjectCode: sub,
+                        chapterName: ch.name,
+                        themeId: th.id,
+                        themeName: th.name
+                    });
+                });
+            }
+        });
+    });
+
+    if (BACKEND_ROSTER_CACHE.length === 0) {
+        table.innerHTML = '<tr><td style="padding:20px;color:#64748b;">No students added yet.</td></tr>';
+        return;
+    }
+
+    if (selectedThemes.length === 0) {
+        table.innerHTML = '<tr><td style="padding:20px;color:#64748b;">No chapters selected. Please check chapters in Setup tab.</td></tr>';
+        return;
+    }
+
+    // Header rows
+    let headerRow1 = '<tr><th rowspan="2" style="border:1px solid #cbd5e1;padding:8px;background:#1e293b;color:#fff;min-width:40px;">Roll</th>'
+                   + '<th rowspan="2" style="border:1px solid #cbd5e1;padding:8px;background:#1e293b;color:#fff;min-width:160px;">Student Name</th>';
+    let headerRow2 = '';
+
+    // Group themes by subject for spanning header
+    const bySubject = {};
+    selectedThemes.forEach(t => {
+        if (!bySubject[t.subjectCode]) bySubject[t.subjectCode] = [];
+        bySubject[t.subjectCode].push(t);
+    });
+
+    Object.keys(bySubject).forEach(sub => {
+        headerRow1 += `<th colspan="${bySubject[sub].length}" style="border:1px solid #cbd5e1;padding:8px;background:#1e3a8a;color:#fff;">${sub}</th>`;
+        bySubject[sub].forEach(t => {
+            headerRow2 += `<th style="border:1px solid #cbd5e1;padding:6px;background:#334155;color:#fff;font-size:11px;min-width:70px;">${t.chapterName}<br><span style="font-weight:normal;">${t.themeName}</span></th>`;
+        });
+    });
+
+    headerRow1 += '</tr>';
+    headerRow2 = '<tr>' + headerRow2 + '</tr>';
+
+    // Data rows
+    let bodyRows = '';
+    BACKEND_ROSTER_CACHE.forEach(student => {
+        let cells = '';
+        selectedThemes.forEach(t => {
+            const key = `${student.id}_${t.themeId}`;
+            const score = RUNTIME_MATRIX_SCORES[key] ?? '';
+            cells += `<td style="border:1px solid #e2e8f0;padding:4px;">
+                <input type="number" min="0" max="100" step="0.5"
+                    value="${score}"
+                    style="width:60px;padding:4px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;"
+                    onchange="saveScore(${student.id}, ${t.themeId}, this.value)"
+                />
+            </td>`;
+        });
+        bodyRows += `<tr>
+            <td style="border:1px solid #e2e8f0;padding:6px;text-align:center;">${student.roll_number}</td>
+            <td style="border:1px solid #e2e8f0;padding:6px;">
+                ${student.student_name}
+                <button onclick="removeStudent(${student.id})"
+                    style="margin-left:6px;background:#dc2626;color:#fff;border:none;border-radius:3px;padding:1px 6px;cursor:pointer;font-size:11px;">✕</button>
+            </td>
+            ${cells}
+        </tr>`;
+    });
+
+    table.innerHTML = `<thead>${headerRow1}${headerRow2}</thead><tbody>${bodyRows}</tbody>`;
+}
+
+async function saveScore(student_id, theme_id, value) {
+    const score = value === '' ? null : parseFloat(value);
+    const key = `${student_id}_${theme_id}`;
+    if (score === null) {
+        delete RUNTIME_MATRIX_SCORES[key];
+    } else {
+        RUNTIME_MATRIX_SCORES[key] = score;
+    }
+    await fetch(`${API_BASE}/marks/save`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SESSION_TOKEN}`
+        },
+        body: JSON.stringify({ student_id, theme_id, score })
+    });
+}
+
+async function removeStudent(id) {
+    if (!confirm('Remove this student?')) return;
+    await fetch(`${API_BASE}/students/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${SESSION_TOKEN}` }
+    });
+    await fetchCloudSystemState();
+}
 
 // ====================================================== // LOAD APP // ======================================================
 window.onload = async function() {
