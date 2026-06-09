@@ -1288,16 +1288,139 @@ document.getElementById(
 ).classList.add('active');
 }
 // ====================================================== // STUDENT PLACEHOLDER // ======================================================
-function createNewStudentNode() {
-alert(
-    'Use your previous student logic here'
-);
+async function createNewStudentNode() {
+
+    const studentName =
+        prompt(
+            'Enter Student Name'
+        );
+
+    if(!studentName) return;
+
+    const grade =
+        document.getElementById(
+            'p-grade'
+        ).value;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/students/bulk`,
+            {
+                method:'POST',
+
+                headers:{
+                    'Content-Type':'application/json',
+
+                    'Authorization':
+                    `Bearer ${SESSION_TOKEN}`
+                },
+
+                body: JSON.stringify({
+
+                    grade,
+
+                    names:[studentName]
+
+                })
+            });
+
+        const data =
+            await response.json();
+
+        if(!response.ok) {
+
+            throw new Error(
+                data.error
+            );
+        }
+
+        await fetchCloudSystemState();
+
+        alert(
+            'Student Added Successfully'
+        );
+
+    } catch(err) {
+
+        alert(err.message);
+    }
 }
-function executeBulkImport() {
-alert(
-    'Use your previous bulk import logic here'
-);
+
+async function executeBulkImport() {
+
+    const raw =
+        prompt(
+            'Enter student names separated by comma'
+        );
+
+    if(!raw) return;
+
+    const names =
+        raw
+        .split(',')
+        .map(name => name.trim())
+        .filter(name => name);
+
+    if(names.length === 0) {
+
+        alert('No valid names');
+
+        return;
+    }
+
+    const grade =
+        document.getElementById(
+            'p-grade'
+        ).value;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/students/bulk`,
+            {
+                method:'POST',
+
+                headers:{
+                    'Content-Type':'application/json',
+
+                    'Authorization':
+                    `Bearer ${SESSION_TOKEN}`
+                },
+
+                body: JSON.stringify({
+
+                    grade,
+
+                    names
+
+                })
+            });
+
+        const data =
+            await response.json();
+
+        if(!response.ok) {
+
+            throw new Error(
+                data.error
+            );
+        }
+
+        await fetchCloudSystemState();
+
+        alert(
+            `${names.length} Students Imported`
+        );
+
+    } catch(err) {
+
+        alert(err.message);
+    }
 }
+
 
 
 // ====================================================== // LOAD APP // ======================================================
