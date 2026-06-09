@@ -656,6 +656,8 @@ BACKEND_CURRICULUM_CACHE
 
             active: row.is_active,
 
+            is_selected: row.is_selected,
+            
             themes:[]
         };
 
