@@ -1140,8 +1140,6 @@ async function editChapter(
 
     await fetchCloudSystemState();
 }
-    await fetchCloudSystemState();
-}
 
 async function editTheme(
     id,
@@ -1301,35 +1299,6 @@ alert(
 }
 
 
-
-
-function toggleChapter(chapterId, isSelected) {
-
-  fetch(
-    'https://cas-backend-s9ba.onrender.com/api/teacher/chapter-toggle',
-    {
-
-      method: 'POST',
-
-      headers: {
-
-        'Content-Type':
-          'application/json',
-
-        Authorization:
-          `Bearer ${SESSION_TOKEN}`
-      },
-
-      body: JSON.stringify({
-
-        chapter_id: chapterId,
-        is_selected: isSelected
-
-      })
-
-    }
-  );
-}
 // ====================================================== // LOAD APP // ======================================================
 window.onload = async function() {
 
