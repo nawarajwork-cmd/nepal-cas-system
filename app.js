@@ -1373,84 +1373,9 @@ alert(
 );
 }
 
-function fetchChapters() {
 
-    fetch(
-        `${API_BASE}/teacher/chapters`,
-    {
-        headers:{
-            Authorization:
-            `Bearer ${SESSION_TOKEN}`
-        }
-    })
 
-    .then(async res => {
 
-        const data =
-            await res.json();
-
-        if(!res.ok) {
-
-            console.log(data);
-
-            throw new Error(
-                data.error || 'Server Error'
-            );
-        }
-
-        return data;
-    })
-
-    .then(data => {
-
-        let html = "";
-
-        data.forEach(ch => {
-
-            html += `
-
-            <div
-                style="
-                    padding:8px;
-                    border-bottom:
-                    1px solid #ddd;
-                "
-            >
-
-                <input
-                    type="checkbox"
-
-                    ${ch.is_selected
-                    ? "checked"
-                    : ""}
-
-                    onchange="
-                        toggleChapter(
-                            ${ch.chapter_id},
-                            this.checked
-                        )
-                    "
-                />
-
-                ${ch.subject_code}
-                -
-                ${ch.chapter_name}
-
-            </div>
-            `;
-        });
-
-        document.getElementById(
-            "chapterList"
-        ).innerHTML = html;
-    })
-
-    .catch(err => {
-
-        console.log(err);
-
-    });
-}
 function toggleChapter(chapterId, isSelected) {
 
   fetch(
@@ -1483,5 +1408,4 @@ window.onload = async function() {
 
     await bootstrapApplicationNode();
 
-    await fetchChapters();
 };
