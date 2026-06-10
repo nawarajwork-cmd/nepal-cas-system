@@ -281,6 +281,8 @@ try {
 
    renderCurriculumPanelMarkup();
 renderStudentList();
+
+renderMarksTable();
   
 } catch(err) {
 
@@ -1116,7 +1118,110 @@ function renderStudentList() {
 
     node.innerHTML = html;
 }
+function renderMarksTable() {
 
+    const container =
+    document.getElementById(
+        'marks-table'
+    );
+
+    if(!container) return;
+
+    const selectedThemes = [];
+
+    const chapterMap = {};
+
+    BACKEND_CURRICULUM_CACHE.forEach(row => {
+
+        if(
+            row.theme_id &&
+            row.is_selected
+        ) {
+
+            selectedThemes.push({
+
+                id: row.theme_id,
+
+                name: row.theme_name
+            });
+        }
+    });
+
+    let html = `
+    <table
+        border="1"
+        style="
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+        "
+    >
+        <tr>
+            <th>Roll</th>
+            <th>Name</th>
+    `;
+
+    selectedThemes.forEach(theme => {
+
+        html += `
+        <th>${theme.name}</th>
+        `;
+    });
+
+    html += `</tr>`;
+
+    BACKEND_ROSTER_CACHE.forEach(student => {
+
+        html += `
+        <tr>
+
+            <td>
+                ${student.roll_number}
+            </td>
+
+            <td>
+                ${student.student_name}
+            </td>
+        `;
+
+        selectedThemes.forEach(theme => {
+
+            const key =
+            `${student.id}_${theme.id}`;
+
+            const score =
+            RUNTIME_MATRIX_SCORES[key] || '';
+
+            html += `
+            <td>
+
+                <input
+                    value="${score}"
+
+                    style="
+                        width:60px;
+                    "
+
+                    onchange="
+                        saveMark(
+                            ${student.id},
+                            ${theme.id},
+                            this.value
+                        )
+                    "
+                >
+
+            </td>
+            `;
+        });
+
+        html += `</tr>`;
+    });
+
+    html += `</table>`;
+
+    container.innerHTML = html;
+}
 
 // ====================================================== // ADD SUBJECT // ======================================================
 async function createNewSubjectNode() {
