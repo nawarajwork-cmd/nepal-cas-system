@@ -717,98 +717,24 @@ Logout
     <!-- ================================================== -->
     <!-- MARKS PANEL -->
     <!-- ================================================== -->
+<div id="view-marks" class="panel">
 
-    <div
-        class="panel"
-        id="view-marks"
-    >
-         <h3>Students</h3>
- <div
-    id="student-list"
-    style="
-        margin-top:15px;
-    "
-></div>
-        <div
-            style="
-                background:#fff;
-                border-radius:8px;
-                padding:20px;
-                border:1px solid #cbd5e1;
-            "
-        >
+    <button onclick="createNewStudentNode()">
+        Add Student
+    </button>
 
-            <h3
-                style="
-                    margin-top:0;
-                    margin-bottom:20px;
-                "
-            >
-                Student Marks Entry
-            </h3>
+    <button onclick="executeBulkImport()">
+        Bulk Import
+    </button>
 
-            <div
-                style="
-                    display:flex;
-                    gap:10px;
-                    margin-bottom:20px;
-                "
-            >
+    <div id="student-list"></div>
 
-                <button
-                    onclick="createNewStudentNode()"
-                    style="
-                        background:#16a34a;
-                        color:#fff;
-                        border:none;
-                        padding:10px 15px;
-                        border-radius:5px;
-                        cursor:pointer;
-                        font-weight:bold;
-                    "
-                >
-                    Add Student
-                </button>
+    <hr>
 
-                <button
-                    onclick="executeBulkImport()"
-                    style="
-                        background:#0284c7;
-                        color:#fff;
-                        border:none;
-                        padding:10px 15px;
-                        border-radius:5px;
-                        cursor:pointer;
-                        font-weight:bold;
-                    "
-                >
-                    Bulk Import
-                </button>
+    <div id="marks-table"></div>
 
-            </div>
-
-            <div
-                style="
-                    overflow-x:auto;
-                    max-height:70vh;
-                "
-            >
-
-                <table
-                    id="data-sheet-matrix"
-                    style="
-                        width:100%;
-                        border-collapse:collapse;
-                        font-size:12px;
-                    "
-                ></table>
-
-            </div>
-
-        </div>
-       
-
-    </div>
+</div>
+   
 
     <!-- ================================================== -->
     <!-- REPORT PANEL -->
