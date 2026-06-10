@@ -222,20 +222,28 @@
         SIRJANA CAS MANAGEMENT SYSTEM
     </h2>
 
-    <button
-        onclick="terminateSession()"
-        style="
-            background:#fee2e2;
-            color:#dc2626;
-            border:none;
-            padding:8px 12px;
-            border-radius:5px;
-            cursor:pointer;
-            font-weight:bold;
-        "
-    >
-        Logout
-    </button>
+ <div
+style="
+display:flex;
+align-items:center;
+gap:10px;
+"
+>
+
+<span
+id="logged-user-name"
+style="
+font-weight:600;
+color:#1e293b;
+"
+>
+</span>
+
+<button onclick="terminateSession()">
+Logout
+</button>
+
+</div>
 
 </div>
 
