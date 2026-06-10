@@ -892,6 +892,7 @@ function renderCurriculumPanelMarkup() {
         margin-bottom:16px;
         background:#f8fafc;
         overflow:hidden;
+        min-height:auto;
     "
 >
 
@@ -910,13 +911,13 @@ function renderCurriculumPanelMarkup() {
 
         <!-- LEFT -->
 
-        <div
+   <div
 style="
 display:flex;
 align-items:center;
 gap:12px;
 flex:1;
-min-width:0;
+width:100%;
 "
 >
 
@@ -933,12 +934,13 @@ min-width:0;
                 "
             />
 
-           <strong
+     <strong
     style="
         color:#1e293b;
         font-size:15px;
         flex:1;
-        word-break:break-word;
+        white-space:normal;
+        overflow-wrap:anywhere;
     "
 >
     ${ch.name}
@@ -949,12 +951,13 @@ min-width:0;
         <!-- RIGHT -->
 
         <div
-            style="
-                display:flex;
-                align-items:center;
-                gap:8px;
-            "
-        >
+style="
+display:flex;
+align-items:center;
+gap:8px;
+flex-shrink:0;
+"
+>
 
             <button
                 title="Add Theme"
