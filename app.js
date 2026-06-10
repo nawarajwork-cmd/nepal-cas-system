@@ -674,8 +674,9 @@ BACKEND_CURRICULUM_CACHE
         map[row.subject_code]
         .chapters
         .push(chapter);
+         ${ch.is_selected ? "checked" : ""}
     }
-            ${ch.is_selected ? "checked" : ""}
+           
 
 if(row.theme_id) {
 
