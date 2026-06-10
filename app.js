@@ -674,7 +674,7 @@ BACKEND_CURRICULUM_CACHE
         map[row.subject_code]
         .chapters
         .push(chapter);
-         ${ch.is_selected ? "checked" : ""}
+     
     }
            
 
@@ -1075,7 +1075,7 @@ min-width:0;
         out.appendChild(box);
     });
 }
-
+ 
 function renderStudentList() {
 
     const node =
