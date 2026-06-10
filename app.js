@@ -38,6 +38,12 @@ if(USER_ROLE === 'ADMIN') {
         'teacher-assignment-panel'
     ).style.display = 'none';
 }
+    document.getElementById(
+    'logged-user-name'
+).textContent =
+sessionStorage.getItem(
+    'CAS_ACTIVE_NAME'
+);
 }
 // ====================================================== // LOGIN // ======================================================
 async function runAuthPipeline() {
@@ -101,7 +107,10 @@ body: JSON.stringify({
         'CAS_ACTIVE_ROLE',
         data.role
     );
-
+sessionStorage.setItem(
+    'CAS_ACTIVE_NAME',
+    data.name
+);
     SESSION_TOKEN = data.token;
 
     USER_ROLE = data.role;
@@ -858,11 +867,8 @@ function renderCurriculumPanelMarkup() {
             display:flex;
             align-items:center;
             justify-content:space-between;
-
             padding:10px 14px;
-
             background:#eef2f7;
-
             border-bottom:1px solid #dbe4ee;
         "
     >
@@ -870,12 +876,14 @@ function renderCurriculumPanelMarkup() {
         <!-- LEFT -->
 
         <div
-            style="
-                display:flex;
-                align-items:center;
-                gap:12px;
-            "
-        >
+style="
+display:flex;
+align-items:center;
+gap:12px;
+flex:1;
+min-width:0;
+"
+>
 
             <input
                 type="checkbox"
