@@ -279,7 +279,8 @@ try {
         ] = mark.score;
     });
 
-    renderCurriculumPanelMarkup();
+   renderCurriculumPanelMarkup();
+renderStudentList();
 
 } catch(err) {
 
@@ -898,14 +899,16 @@ min-width:0;
                 "
             />
 
-            <strong
-                style="
-                    color:#1e293b;
-                    font-size:15px;
-                "
-            >
-                ${ch.name}
-            </strong>
+           <strong
+    style="
+        color:#1e293b;
+        font-size:15px;
+        flex:1;
+        word-break:break-word;
+    "
+>
+    ${ch.name}
+</strong>
 
         </div>
 
@@ -1070,6 +1073,38 @@ min-width:0;
 
         out.appendChild(box);
     });
+}
+
+function renderStudentList() {
+
+    const node =
+        document.getElementById(
+            'student-list'
+        );
+
+    if(!node) return;
+
+    let html = '';
+
+    BACKEND_ROSTER_CACHE.forEach(st => {
+
+        html += `
+        <div
+            style="
+                padding:8px 12px;
+                margin-bottom:6px;
+                border:1px solid #dbe4ee;
+                border-radius:8px;
+                background:white;
+            "
+        >
+            ${st.roll_number}.
+            ${st.student_name}
+        </div>
+        `;
+    });
+
+    node.innerHTML = html;
 }
 // ====================================================== // ADD SUBJECT // ======================================================
 async function createNewSubjectNode() {
