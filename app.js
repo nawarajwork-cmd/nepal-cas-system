@@ -670,13 +670,13 @@ BACKEND_CURRICULUM_CACHE
             
             themes:[]
         };
-        ${ch.is_selected ? "checked" : ""}
 
         map[row.subject_code]
         .chapters
         .push(chapter);
     }
-    
+            ${ch.is_selected ? "checked" : ""}
+
 if(row.theme_id) {
 
     const alreadyExists =
