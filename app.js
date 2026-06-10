@@ -660,6 +660,7 @@ BACKEND_CURRICULUM_CACHE
             
             themes:[]
         };
+        ${ch.is_selected ? "checked" : ""}
 
         map[row.subject_code]
         .chapters
