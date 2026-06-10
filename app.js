@@ -939,8 +939,9 @@ width:100%;
         color:#1e293b;
         font-size:15px;
         flex:1;
-        white-space:normal;
-        overflow-wrap:anywhere;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
     "
 >
     ${ch.name}
