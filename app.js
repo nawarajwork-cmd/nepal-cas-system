@@ -287,6 +287,39 @@ renderStudentList();
     console.log(err);
 }
 }
+
+function renderStudentList() {
+
+    const node =
+        document.getElementById(
+            'student-list'
+        );
+
+    if(!node) return;
+
+    let html = '';
+
+    BACKEND_ROSTER_CACHE.forEach(st => {
+
+        html += `
+        <div
+            style="
+                padding:8px 12px;
+                margin-bottom:6px;
+                border:1px solid #dbe4ee;
+                border-radius:8px;
+                background:white;
+            "
+        >
+            ${st.roll_number}.
+            ${st.student_name}
+        </div>
+        `;
+    });
+
+    node.innerHTML = html;
+}
+
 // ====================================================== // TEACHER MANAGEMENT // ======================================================
 async function createTeacher() {
 const full_name =
