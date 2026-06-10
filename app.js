@@ -883,6 +883,10 @@ function renderCurriculumPanelMarkup() {
                   themeCounter++;
 
 });
+            console.log(
+    ch.name,
+    ch.themes.length
+);
            chapters += `
 
 <div
@@ -911,13 +915,13 @@ function renderCurriculumPanelMarkup() {
 
         <!-- LEFT -->
 
-   <div
+ <div
 style="
 display:flex;
 align-items:center;
 gap:12px;
 flex:1;
-width:100%;
+margin-right:15px;
 "
 >
 
@@ -934,15 +938,14 @@ width:100%;
                 "
             />
 
-     <strong
-    style="
-        color:#1e293b;
-        font-size:15px;
-        flex:1;
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
-    "
+    <strong
+style="
+    color:#1e293b;
+    font-size:15px;
+    flex:1;
+    display:block;
+    width:100%;
+"
 >
     ${ch.name}
 </strong>
@@ -1110,6 +1113,7 @@ flex-shrink:0;
         `;
 
         out.appendChild(box);
+        console.log(box.innerHTML);
     });
 }
  
